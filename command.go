@@ -8,6 +8,7 @@ import (
 	"os/exec"
 )
 
+// Command is better os/exec command
 type Command struct {
 	Script      string            `json:"content"`
 	Context     string            `json:"context"`
@@ -20,6 +21,7 @@ type Command struct {
 	cmd *exec.Cmd
 }
 
+// Run runs the command
 func (c *Command) Run() error {
 	environment := os.Environ()
 
@@ -58,6 +60,7 @@ func (c *Command) Run() error {
 	return nil
 }
 
+// Config gets the config of command
 func (c *Command) Config() (string, error) {
 	cfg, err := json.MarshalIndent(c, "", " ")
 	if err != nil {
@@ -67,6 +70,7 @@ func (c *Command) Config() (string, error) {
 	return string(cfg), nil
 }
 
+// MustConfig gets the config of command
 func (c *Command) MustConfig() string {
 	cfg, err := c.Config()
 	if err != nil {
@@ -76,6 +80,7 @@ func (c *Command) MustConfig() string {
 	return cfg
 }
 
+// ExitCode gets the exit code of process
 func (c *Command) ExitCode() int {
 	return c.cmd.ProcessState.ExitCode()
 }
