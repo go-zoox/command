@@ -5,6 +5,7 @@ import (
 
 	"github.com/go-zoox/command/engine"
 	"github.com/go-zoox/command/engine/host"
+	"github.com/go-zoox/command/terminal"
 )
 
 type Command interface {
@@ -13,6 +14,8 @@ type Command interface {
 	Cancel() error
 	//
 	Run() error
+	//
+	Terminal() (terminal.Terminal, error)
 }
 
 type Config struct {

@@ -31,5 +31,9 @@ func New(cfg *Config) (engine.Engine, error) {
 		stderr: os.Stderr,
 	}
 
+	if err := h.create(); err != nil {
+		return nil, err
+	}
+
 	return h, nil
 }

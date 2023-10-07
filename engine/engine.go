@@ -1,6 +1,10 @@
 package engine
 
-import "io"
+import (
+	"io"
+
+	"github.com/go-zoox/command/terminal"
+)
 
 type Engine interface {
 	Start() error
@@ -10,6 +14,8 @@ type Engine interface {
 	SetStdin(stdin io.Reader) error
 	SetStdout(stdout io.Writer) error
 	SetStderr(stderr io.Writer) error
+	//
+	Terminal() (terminal.Terminal, error)
 }
 
 type Config struct {

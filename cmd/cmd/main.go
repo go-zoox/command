@@ -13,7 +13,7 @@ func main() {
 		Version: command.Version,
 	})
 
-	commands.Run(app)
+	commands.Exec(app)
 
 	app.Run()
 }
