@@ -1,86 +1,60 @@
 package command
 
 import (
-	"encoding/json"
 	"fmt"
-	"io"
-	"os"
-	"os/exec"
+
+	"github.com/go-zoox/command/engine"
+	"github.com/go-zoox/command/engine/host"
 )
 
-// Command is better os/exec command
-type Command struct {
-	Script      string            `json:"content"`
-	Context     string            `json:"context"`
-	Environment map[string]string `json:"environment"`
-	Shell       string            `json:"shell"`
+type Command interface {
+	Start() error
+	Wait() error
+	Cancel() error
 	//
-	Stdout io.Writer
-	Stderr io.Writer
-	//
-	cmd *exec.Cmd
+	Run() error
 }
 
-// Run runs the command
-func (c *Command) Run() error {
-	environment := os.Environ()
+type Config struct {
+	Engine      string
+	Command     string
+	WorkDir     string
+	Environment map[string]string
+	User        string
+	Shell       string
+}
 
-	for k, v := range c.Environment {
-		environment = append(environment, fmt.Sprintf("%s=%s", k, v))
+func New(cfg *Config) (cmd Command, err error) {
+	if cfg.Engine == "" {
+		cfg.Engine = host.Engine
 	}
 
-	shell := c.Shell
-	if shell == "" {
-		shell = os.Getenv("SHELL")
-		if shell == "" {
-			shell = "sh"
+	if cfg.Shell == "" {
+		cfg.Shell = "/bin/sh"
+	}
+
+	var engine engine.Engine
+	switch cfg.Engine {
+	case host.Engine:
+		engine, err = host.New(&host.Config{
+			Command:     cfg.Command,
+			WorkDir:     cfg.WorkDir,
+			Environment: cfg.Environment,
+			User:        cfg.User,
+			Shell:       cfg.Shell,
+		})
+		if err != nil {
+			return nil, err
 		}
+	default:
+		return nil, fmt.Errorf("unsupported command engine: %s", cfg.Engine)
 	}
 
-	cmd := exec.Command(shell, "-c", c.Script)
-	cmd.Dir = c.Context
-	cmd.Env = environment
-
-	cmd.Stdout = c.Stdout
-	if cmd.Stdout == nil {
-		cmd.Stdout = os.Stdout
-	}
-
-	cmd.Stderr = c.Stderr
-	if cmd.Stderr == nil {
-		cmd.Stderr = os.Stderr
-	}
-
-	c.cmd = cmd
-
-	if err := cmd.Run(); err != nil {
-		return err
-	}
-
-	return nil
+	return &command{
+		engine: engine,
+	}, nil
 }
 
-// Config gets the config of command
-func (c *Command) Config() (string, error) {
-	cfg, err := json.MarshalIndent(c, "", " ")
-	if err != nil {
-		return "", err
-	}
-
-	return string(cfg), nil
-}
-
-// MustConfig gets the config of command
-func (c *Command) MustConfig() string {
-	cfg, err := c.Config()
-	if err != nil {
-		return ""
-	}
-
-	return cfg
-}
-
-// ExitCode gets the exit code of process
-func (c *Command) ExitCode() int {
-	return c.cmd.ProcessState.ExitCode()
+type command struct {
+	engine engine.Engine
 }

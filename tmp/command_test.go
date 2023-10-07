@@ -8,7 +8,7 @@ import (
 )
 
 func TestCommand(t *testing.T) {
-	cmd := &Command{
+	cmd := &command{
 		Script: `echo "hello world"`,
 	}
 
@@ -25,7 +25,7 @@ func TestCommand(t *testing.T) {
 }
 
 func TestCommandWithContext(t *testing.T) {
-	cmd := &Command{
+	cmd := &command{
 		Script:  `echo "PWD: $PWD"`,
 		Context: `/tmp`,
 	}
@@ -43,7 +43,7 @@ func TestCommandWithContext(t *testing.T) {
 }
 
 func TestCommandWithEnvironment(t *testing.T) {
-	cmd := &Command{
+	cmd := &command{
 		Script:  `echo "PWD: $PWD"`,
 		Context: `/tmp`,
 		Environment: map[string]string{
@@ -68,7 +68,7 @@ func TestCommandWithEnvironment(t *testing.T) {
 }
 
 func TestCommandWithShell(t *testing.T) {
-	cmd := &Command{
+	cmd := &command{
 		Script:  `echo "PWD: $PWD"`,
 		Context: `/tmp`,
 		Environment: map[string]string{
@@ -95,7 +95,7 @@ func TestCommandWithShell(t *testing.T) {
 
 func TestCommandWithMultilines(t *testing.T) {
 	output := &Output{}
-	cmd := &Command{
+	cmd := &command{
 		Script: `
 echo 1
 echo 2
