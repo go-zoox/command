@@ -65,16 +65,11 @@ func Exec(app *cli.MultipleProgram) {
 				defer term.Close()
 
 				go func() {
-					buf := make([]byte, 1024)
-					for {
-						n, err := term.Read(buf)
-						if err != nil && err != io.EOF {
-							os.Stderr.Write([]byte(err.Error()))
-							os.Exit(term.ExitCode())
-							return
-						}
-
-						os.Stdout.Write(buf[:n])
+					_, err := io.Copy(os.Stdout, term)
+					if err != nil && err != io.EOF {
+						os.Stderr.Write([]byte(err.Error()))
+						os.Exit(term.ExitCode())
+						return
 					}
 				}()
 

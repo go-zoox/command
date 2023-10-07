@@ -7,8 +7,6 @@ type Terminal interface {
 
 	//
 	Resize(rows, cols int) error
-	//
-	Wait() error
 
 	//
 	ExitCode() int

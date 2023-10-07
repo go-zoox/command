@@ -32,10 +32,6 @@ func (rt *Terminal) Resize(rows, cols int) error {
 	})
 }
 
-func (rt *Terminal) Wait() error {
-	return rt.Cmd.Wait()
-}
-
 func (rt *Terminal) ExitCode() int {
 	return rt.Cmd.ProcessState.ExitCode()
 }

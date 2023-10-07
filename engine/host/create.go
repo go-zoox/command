@@ -34,9 +34,9 @@ func (h *host) create() error {
 		return err
 	}
 
-	// if err := applyUser(h.cmd, h.cfg.User); err != nil {
-	// 	return err
-	// }
+	if err := applyUser(h.cmd, h.cfg.User); err != nil {
+		return err
+	}
 
 	if err := applyHistory(h.cmd, h.cfg.IsHistoryDisabled); err != nil {
 		return err
