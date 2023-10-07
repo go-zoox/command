@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"os"
@@ -35,10 +36,28 @@ func Exec(app *cli.MultipleProgram) {
 				EnvVars: []string{"COMMAND"},
 			},
 			&cli.StringFlag{
+				Name:    "workdir",
+				Usage:   "the command workdir",
+				Aliases: []string{"w"},
+				EnvVars: []string{"WORKDIR"},
+			},
+			&cli.StringFlag{
+				Name:    "user",
+				Usage:   "the command user",
+				Aliases: []string{"u"},
+				// EnvVars: []string{"WORKDIR"},
+			},
+			&cli.StringFlag{
 				Name:    "shell",
 				Usage:   "the command shell",
 				Aliases: []string{"s"},
-				EnvVars: []string{"SHELL"},
+				// EnvVars: []string{"SHELL"},
+			},
+			&cli.StringFlag{
+				Name:    "image",
+				Usage:   "docker image",
+				Aliases: []string{"i"},
+				EnvVars: []string{"IMAGE"},
 			},
 			&cli.BoolFlag{
 				Name:    "tty",
@@ -48,10 +67,13 @@ func Exec(app *cli.MultipleProgram) {
 			},
 		},
 		Action: func(ctx *cli.Context) (err error) {
-			cmd, err := command.New(&command.Config{
+			cmd, err := command.New(context.Background(), &command.Config{
 				Engine:  ctx.String("engine"),
 				Command: ctx.String("command"),
+				WorkDir: ctx.String("workdir"),
+				User:    ctx.String("user"),
 				Shell:   ctx.String("shell"),
+				Image:   ctx.String("image"),
 			})
 			if err != nil {
 				return err
@@ -65,12 +87,13 @@ func Exec(app *cli.MultipleProgram) {
 				defer term.Close()
 
 				go func() {
-					_, err := io.Copy(os.Stdout, term)
-					if err != nil && err != io.EOF {
-						os.Stderr.Write([]byte(err.Error()))
-						os.Exit(term.ExitCode())
-						return
-					}
+					io.Copy(os.Stdout, term)
+					// _, err := io.Copy(os.Stdout, term)
+					// if err != nil && err != io.EOF {
+					// 	os.Stderr.Write([]byte(err.Error()))
+					// 	os.Exit(term.ExitCode())
+					// 	return
+					// }
 				}()
 
 				if err := connectKeyboard(term); err != nil {

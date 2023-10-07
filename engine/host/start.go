@@ -1,5 +1,10 @@
 package host
 
+import (
+	"io"
+	"os/exec"
+)
+
 func (h *host) Start() error {
 	if err := applyStdin(h.cmd, h.stdin); err != nil {
 		return nil
@@ -14,4 +19,23 @@ func (h *host) Start() error {
 	}
 
 	return h.cmd.Start()
+}
+
+func applyStdin(cmd *exec.Cmd, stdin io.Reader) error {
+	cmd.Stdin = stdin
+	return nil
+}
+
+func applyStdout(cmd *exec.Cmd, stdout io.Writer) error {
+	cmd.Stdout = stdout
+	if cmd.Stderr == nil {
+		return applyStderr(cmd, stdout)
+	}
+
+	return nil
+}
+
+func applyStderr(cmd *exec.Cmd, stderr io.Writer) error {
+	cmd.Stderr = stderr
+	return nil
 }

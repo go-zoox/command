@@ -3,7 +3,6 @@ package host
 import (
 	"errors"
 	"fmt"
-	"io"
 	"os"
 	"os/exec"
 	"os/user"
@@ -98,24 +97,5 @@ func applyHistory(cmd *exec.Cmd, disable bool) error {
 		cmd.Env = append(cmd.Env, "HISTFILE=/dev/null")
 	}
 
-	return nil
-}
-
-func applyStdin(cmd *exec.Cmd, stdin io.Reader) error {
-	cmd.Stdin = stdin
-	return nil
-}
-
-func applyStdout(cmd *exec.Cmd, stdout io.Writer) error {
-	cmd.Stdout = stdout
-	if cmd.Stderr == nil {
-		return applyStderr(cmd, stdout)
-	}
-
-	return nil
-}
-
-func applyStderr(cmd *exec.Cmd, stderr io.Writer) error {
-	cmd.Stderr = stderr
 	return nil
 }

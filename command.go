@@ -1,9 +1,11 @@
 package command
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/go-zoox/command/engine"
+	"github.com/go-zoox/command/engine/docker"
 	"github.com/go-zoox/command/engine/host"
 	"github.com/go-zoox/command/terminal"
 )
@@ -25,9 +27,12 @@ type Config struct {
 	Environment map[string]string
 	User        string
 	Shell       string
+
+	// engine = docker
+	Image string
 }
 
-func New(cfg *Config) (cmd Command, err error) {
+func New(ctx context.Context, cfg *Config) (cmd Command, err error) {
 	if cfg.Engine == "" {
 		cfg.Engine = host.Engine
 	}
@@ -39,12 +44,24 @@ func New(cfg *Config) (cmd Command, err error) {
 	var engine engine.Engine
 	switch cfg.Engine {
 	case host.Engine:
-		engine, err = host.New(&host.Config{
+		engine, err = host.New(ctx, &host.Config{
 			Command:     cfg.Command,
 			WorkDir:     cfg.WorkDir,
 			Environment: cfg.Environment,
 			User:        cfg.User,
 			Shell:       cfg.Shell,
+		})
+		if err != nil {
+			return nil, err
+		}
+	case docker.Engine:
+		engine, err = docker.New(ctx, &docker.Config{
+			Command:     cfg.Command,
+			WorkDir:     cfg.WorkDir,
+			Environment: cfg.Environment,
+			User:        cfg.User,
+			Shell:       cfg.Shell,
+			Image:       cfg.Image,
 		})
 		if err != nil {
 			return nil, err

@@ -1,6 +1,7 @@
 package host
 
 import (
+	"context"
 	"io"
 	"os"
 	"os/exec"
@@ -11,6 +12,8 @@ import (
 const Engine = "host"
 
 type host struct {
+	ctx context.Context
+	//
 	cfg *Config
 	//
 	cmd *exec.Cmd
@@ -22,8 +25,13 @@ type host struct {
 	stderr io.Writer
 }
 
-func New(cfg *Config) (engine.Engine, error) {
+func New(ctx context.Context, cfg *Config) (engine.Engine, error) {
+	if cfg.Shell == "" {
+		cfg.Shell = "/bin/sh"
+	}
+
 	h := &host{
+		ctx: ctx,
 		cfg: cfg,
 		//
 		stdin:  os.Stdin,

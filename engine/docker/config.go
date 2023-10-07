@@ -1,14 +1,11 @@
 package docker
 
 type Config struct {
-	Shell       string
+	Command     string
 	Environment map[string]string
 	WorkDir     string
-
-	//
-	User string
+	User        string
+	Shell       string
 
 	Image string
-
-	InitCommand string
 }

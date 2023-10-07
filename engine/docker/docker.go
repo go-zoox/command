@@ -1,18 +1,36 @@
 package docker
 
 import (
-	"github.com/go-zoox/terminal/server/driver"
+	"context"
+	"io"
+	"os"
+
+	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/client"
+	"github.com/go-zoox/command/engine"
 )
 
-type Docker interface {
-	driver.Driver
-}
+const Engine = "docker"
 
 type docker struct {
 	cfg *Config
+	//
+	args []string
+	env  []string
+	//
+	ctx context.Context
+	//
+	client *client.Client
+	//
+	container container.CreateResponse
+
+	//
+	stdin  io.Reader
+	stdout io.Writer
+	stderr io.Writer
 }
 
-func New(cfg *Config) Docker {
+func New(ctx context.Context, cfg *Config) (engine.Engine, error) {
 	if cfg.Image == "" {
 		cfg.Image = "whatwewant/zmicro:v1"
 	}
@@ -21,7 +39,18 @@ func New(cfg *Config) Docker {
 		cfg.Shell = "/bin/sh"
 	}
 
-	return &docker{
+	d := &docker{
+		ctx: ctx,
 		cfg: cfg,
+		//
+		stdin:  os.Stdin,
+		stdout: os.Stdout,
+		stderr: os.Stderr,
 	}
+
+	if err := d.create(); err != nil {
+		return nil, err
+	}
+
+	return d, nil
 }
