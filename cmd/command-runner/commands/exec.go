@@ -85,18 +85,31 @@ func Exec(app *cli.MultipleProgram) {
 				Aliases: []string{"p"},
 				EnvVars: []string{"PLATFORM"},
 			},
+			&cli.StringFlag{
+				Name:    "network",
+				Usage:   `Network name`,
+				Aliases: []string{"n"},
+				EnvVars: []string{"NETWORK"},
+			},
+			&cli.BoolFlag{
+				Name:    "disable-network",
+				Usage:   "Disable network visit",
+				EnvVars: []string{"DISABLE_NETWORK"},
+			},
 		},
 		Action: func(ctx *cli.Context) (err error) {
 			cmd, err := command.New(context.Background(), &command.Config{
-				Engine:   ctx.String("engine"),
-				Command:  ctx.String("command"),
-				WorkDir:  ctx.String("workdir"),
-				User:     ctx.String("user"),
-				Shell:    ctx.String("shell"),
-				Image:    ctx.String("image"),
-				Memory:   ctx.Int64("memory"),
-				CPU:      ctx.Float64("cpu"),
-				Platform: ctx.String("platform"),
+				Engine:         ctx.String("engine"),
+				Command:        ctx.String("command"),
+				WorkDir:        ctx.String("workdir"),
+				User:           ctx.String("user"),
+				Shell:          ctx.String("shell"),
+				Image:          ctx.String("image"),
+				Memory:         ctx.Int64("memory"),
+				CPU:            ctx.Float64("cpu"),
+				Platform:       ctx.String("platform"),
+				Network:        ctx.String("network"),
+				DisableNetwork: ctx.Bool("disable-network"),
 			})
 			if err != nil {
 				return err

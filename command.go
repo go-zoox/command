@@ -43,6 +43,10 @@ type Config struct {
 	CPU float64
 	// Platform is the command platform, available: linux/amd64, linux/arm64
 	Platform string
+	// Network is the network name
+	Network string
+	// DisableNetwork disables network
+	DisableNetwork bool
 }
 
 // New creates a new command runner.
@@ -70,15 +74,17 @@ func New(ctx context.Context, cfg *Config) (cmd Command, err error) {
 		}
 	case docker.Name:
 		engine, err = docker.New(ctx, &docker.Config{
-			Command:     cfg.Command,
-			WorkDir:     cfg.WorkDir,
-			Environment: cfg.Environment,
-			User:        cfg.User,
-			Shell:       cfg.Shell,
-			Image:       cfg.Image,
-			Memory:      cfg.Memory,
-			CPU:         cfg.CPU,
-			Platform:    cfg.Platform,
+			Command:        cfg.Command,
+			WorkDir:        cfg.WorkDir,
+			Environment:    cfg.Environment,
+			User:           cfg.User,
+			Shell:          cfg.Shell,
+			Image:          cfg.Image,
+			Memory:         cfg.Memory,
+			CPU:            cfg.CPU,
+			Platform:       cfg.Platform,
+			Network:        cfg.Network,
+			DisableNetwork: cfg.DisableNetwork,
 		})
 		if err != nil {
 			return nil, err

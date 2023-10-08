@@ -3,8 +3,10 @@ package docker
 import (
 	"fmt"
 
+	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/mount"
+	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/client"
 	"github.com/go-zoox/core-utils/cast"
 	"github.com/go-zoox/core-utils/strings"
@@ -56,9 +58,13 @@ func (d *docker) create() (err error) {
 			// 	ReadOnly: false,
 			// },
 		},
+		// NetworkMode: "none",
 	}
 	if d.cfg.Memory != 0 {
 		hostCfg.Resources.Memory = d.cfg.Memory * 1024 * 1024
+	}
+	if d.cfg.DisableNetwork {
+		hostCfg.NetworkMode = "none"
 	}
 
 	if d.cfg.CPU != 0 {
@@ -72,6 +78,20 @@ func (d *docker) create() (err error) {
 			Target:   d.cfg.WorkDir,
 			ReadOnly: false,
 		})
+	}
+
+	networkCfg := &network.NetworkingConfig{
+		EndpointsConfig: map[string]*network.EndpointSettings{},
+	}
+	if d.cfg.Network != "" {
+		networkIns, err := d.client.NetworkInspect(d.ctx, d.cfg.Network, types.NetworkInspectOptions{})
+		if err != nil {
+			return err
+		}
+
+		networkCfg.EndpointsConfig[d.cfg.Network] = &network.EndpointSettings{
+			NetworkID: networkIns.ID,
+		}
 	}
 
 	platformCfg := &ocispec.Platform{
@@ -90,7 +110,7 @@ func (d *docker) create() (err error) {
 		platformCfg.Architecture = osArch[1]
 	}
 
-	d.container, err = d.client.ContainerCreate(d.ctx, cfg, hostCfg, nil, platformCfg, uuid.V4())
+	d.container, err = d.client.ContainerCreate(d.ctx, cfg, hostCfg, networkCfg, platformCfg, uuid.V4())
 	if err != nil {
 		return err
 	}

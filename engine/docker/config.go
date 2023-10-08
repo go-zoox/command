@@ -16,4 +16,8 @@ type Config struct {
 	CPU float64
 	// Platform is the command platform, available: linux/amd64, linux/arm64
 	Platform string
+	// Network is the network name
+	Network string
+	// DisableNetwork disables network
+	DisableNetwork bool
 }
