@@ -8,6 +8,7 @@ import (
 	"github.com/go-zoox/uuid"
 )
 
+// create creates a container.
 func (d *docker) create() (err error) {
 	if d.cfg.Command != "" {
 		d.args = append(d.args, "-c", d.cfg.Command)

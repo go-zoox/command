@@ -17,6 +17,7 @@ import (
 	"golang.org/x/term"
 )
 
+// Exec is the exec command
 func Exec(app *cli.MultipleProgram) {
 	app.Register("exec", &cli.Command{
 		Name:  "exec",

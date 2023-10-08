@@ -7,6 +7,7 @@ import (
 	"github.com/docker/docker/api/types"
 )
 
+// Start starts the command.
 func (d *docker) Start() error {
 	stream, err := d.client.ContainerAttach(d.ctx, d.container.ID, types.ContainerAttachOptions{
 		Stream: true,

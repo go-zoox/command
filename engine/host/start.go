@@ -5,6 +5,7 @@ import (
 	"os/exec"
 )
 
+// Start starts the command.
 func (h *host) Start() error {
 	if err := applyStdin(h.cmd, h.stdin); err != nil {
 		return nil

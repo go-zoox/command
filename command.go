@@ -10,6 +10,7 @@ import (
 	"github.com/go-zoox/command/terminal"
 )
 
+// Command is the command runner interface
 type Command interface {
 	Start() error
 	Wait() error
@@ -20,6 +21,7 @@ type Command interface {
 	Terminal() (terminal.Terminal, error)
 }
 
+// Config is the command config
 type Config struct {
 	Engine      string
 	Command     string
@@ -32,9 +34,10 @@ type Config struct {
 	Image string
 }
 
+// New creates a new command runner.
 func New(ctx context.Context, cfg *Config) (cmd Command, err error) {
 	if cfg.Engine == "" {
-		cfg.Engine = host.Engine
+		cfg.Engine = host.Name
 	}
 
 	if cfg.Shell == "" {
@@ -43,7 +46,7 @@ func New(ctx context.Context, cfg *Config) (cmd Command, err error) {
 
 	var engine engine.Engine
 	switch cfg.Engine {
-	case host.Engine:
+	case host.Name:
 		engine, err = host.New(ctx, &host.Config{
 			Command:     cfg.Command,
 			WorkDir:     cfg.WorkDir,
@@ -54,7 +57,7 @@ func New(ctx context.Context, cfg *Config) (cmd Command, err error) {
 		if err != nil {
 			return nil, err
 		}
-	case docker.Engine:
+	case docker.Name:
 		engine, err = docker.New(ctx, &docker.Config{
 			Command:     cfg.Command,
 			WorkDir:     cfg.WorkDir,

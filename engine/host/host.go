@@ -9,7 +9,8 @@ import (
 	"github.com/go-zoox/command/engine"
 )
 
-const Engine = "host"
+// Name is the name of the engine.
+const Name = "host"
 
 type host struct {
 	ctx context.Context
@@ -25,6 +26,7 @@ type host struct {
 	stderr io.Writer
 }
 
+// New creates a new host engine.
 func New(ctx context.Context, cfg *Config) (engine.Engine, error) {
 	if cfg.Shell == "" {
 		cfg.Shell = "/bin/sh"

@@ -6,6 +6,7 @@ import (
 	"github.com/go-zoox/command/terminal"
 )
 
+// Engine is the interface that an command engine must implement.
 type Engine interface {
 	Start() error
 	Wait() error
@@ -16,11 +17,4 @@ type Engine interface {
 	SetStderr(stderr io.Writer) error
 	//
 	Terminal() (terminal.Terminal, error)
-}
-
-type Config struct {
-	Shell       string
-	Command     string
-	Environment map[string]string
-	WorkDir     string
 }

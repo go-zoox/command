@@ -10,7 +10,8 @@ import (
 	"github.com/go-zoox/command/engine"
 )
 
-const Engine = "docker"
+// Name is the name of the engine.
+const Name = "docker"
 
 type docker struct {
 	cfg *Config
@@ -30,6 +31,7 @@ type docker struct {
 	stderr io.Writer
 }
 
+// New creates a new docker engine.
 func New(ctx context.Context, cfg *Config) (engine.Engine, error) {
 	if cfg.Image == "" {
 		cfg.Image = "whatwewant/zmicro:v1"

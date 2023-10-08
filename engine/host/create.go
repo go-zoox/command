@@ -12,6 +12,7 @@ import (
 	"github.com/spf13/cast"
 )
 
+// Create creates the command.
 func (h *host) create() error {
 	if h.cmd != nil {
 		return errors.New("command: already created")

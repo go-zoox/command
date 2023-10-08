@@ -12,6 +12,7 @@ import (
 	"github.com/go-zoox/command/terminal"
 )
 
+// Terminal returns a terminal.
 func (d *docker) Terminal() (terminal.Terminal, error) {
 	stream, err := d.client.ContainerAttach(d.ctx, d.container.ID, types.ContainerAttachOptions{
 		Stream: true,
@@ -39,6 +40,7 @@ func (d *docker) Terminal() (terminal.Terminal, error) {
 	return t, nil
 }
 
+// Terminal is a terminal.
 type Terminal struct {
 	Ctx  context.Context
 	Conn net.Conn
@@ -47,6 +49,7 @@ type Terminal struct {
 	ContainerID string
 }
 
+// Close closes the terminal.
 func (t *Terminal) Close() error {
 	t.Conn.Close()
 
@@ -55,14 +58,17 @@ func (t *Terminal) Close() error {
 	})
 }
 
+// Read reads from the terminal.
 func (t *Terminal) Read(p []byte) (n int, err error) {
 	return t.Conn.Read(p)
 }
 
+// Write writes to the terminal.
 func (t *Terminal) Write(p []byte) (n int, err error) {
 	return t.Conn.Write(p)
 }
 
+// Resize resizes the terminal.
 func (t *Terminal) Resize(rows, cols int) error {
 	inspect, err := t.Client.ContainerInspect(t.Ctx, t.ContainerID)
 	if err != nil {
@@ -80,6 +86,7 @@ func (t *Terminal) Resize(rows, cols int) error {
 	})
 }
 
+// ExitCode returns the exit code.
 func (t *Terminal) ExitCode() int {
 	inspect, err := t.Client.ContainerInspect(t.Ctx, t.ContainerID)
 	if err != nil {
@@ -89,8 +96,9 @@ func (t *Terminal) ExitCode() int {
 	return inspect.State.ExitCode
 }
 
-func (rt *Terminal) Wait() error {
-	resultC, errC := rt.Client.ContainerWait(rt.Ctx, rt.ContainerID, container.WaitConditionNotRunning)
+// Wait waits for the terminal to exit.
+func (t *Terminal) Wait() error {
+	resultC, errC := t.Client.ContainerWait(t.Ctx, t.ContainerID, container.WaitConditionNotRunning)
 	select {
 	case err := <-errC:
 		if err != nil && err != io.EOF {

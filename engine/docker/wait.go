@@ -7,6 +7,7 @@ import (
 	"github.com/docker/docker/api/types/container"
 )
 
+// Wait waits for the command to finish.
 func (d *docker) Wait() error {
 	result, err := d.client.ContainerWait(d.ctx, d.container.ID, container.WaitConditionNotRunning)
 	select {
