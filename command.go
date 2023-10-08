@@ -29,6 +29,8 @@ type Command interface {
 
 // Config is the command config
 type Config struct {
+	Context context.Context
+
 	// Engine is the command engine, available: host, docker
 	Engine string
 
@@ -60,7 +62,11 @@ type Config struct {
 }
 
 // New creates a new command runner.
-func New(ctx context.Context, cfg *Config) (cmd Command, err error) {
+func New(cfg *Config) (cmd Command, err error) {
+	if cfg.Context == nil {
+		cfg.Context = context.Background()
+	}
+
 	if cfg.Engine == "" {
 		cfg.Engine = host.Name
 	}
@@ -132,7 +138,7 @@ func New(ctx context.Context, cfg *Config) (cmd Command, err error) {
 	}
 
 	go func() {
-		<-ctx.Done()
+		<-cfg.Context.Done()
 		engine.Cancel()
 	}()
 

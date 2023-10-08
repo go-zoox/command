@@ -1,7 +1,6 @@
 package command
 
 import (
-	"context"
 	"strings"
 	"testing"
 )
@@ -11,7 +10,7 @@ func TestNew(t *testing.T) {
 		Command: "echo hello world",
 	}
 
-	cmd, err := New(context.Background(), cfg)
+	cmd, err := New(cfg)
 	if err != nil {
 		t.Fatalf("failed to create command: %v", err)
 	}
