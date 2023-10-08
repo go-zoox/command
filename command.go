@@ -3,6 +3,7 @@ package command
 import (
 	"context"
 	"fmt"
+	"io"
 
 	"github.com/go-zoox/command/engine"
 	"github.com/go-zoox/command/engine/docker"
@@ -17,6 +18,10 @@ type Command interface {
 	Cancel() error
 	//
 	Run() error
+	//
+	SetStdin(stdin io.Reader) error
+	SetStdout(stdout io.Writer) error
+	SetStderr(stderr io.Writer) error
 	//
 	Terminal() (terminal.Terminal, error)
 }
