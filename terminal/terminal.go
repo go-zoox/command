@@ -10,4 +10,7 @@ type Terminal interface {
 
 	//
 	ExitCode() int
+
+	//
+	Wait() error
 }

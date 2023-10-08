@@ -25,6 +25,18 @@ type Terminal struct {
 	Cmd *exec.Cmd
 }
 
+func (t *Terminal) Close() error {
+	return t.File.Close()
+}
+
+func (t *Terminal) Read(p []byte) (n int, err error) {
+	return t.File.Read(p)
+}
+
+func (t *Terminal) Write(p []byte) (n int, err error) {
+	return t.File.Write(p)
+}
+
 func (rt *Terminal) Resize(rows, cols int) error {
 	return pty.Setsize(rt.File, &pty.Winsize{
 		Rows: uint16(rows),
@@ -34,4 +46,8 @@ func (rt *Terminal) Resize(rows, cols int) error {
 
 func (rt *Terminal) ExitCode() int {
 	return rt.Cmd.ProcessState.ExitCode()
+}
+
+func (rt *Terminal) Wait() error {
+	return rt.Cmd.Wait()
 }

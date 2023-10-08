@@ -2,9 +2,12 @@ package docker
 
 import (
 	"context"
+	"fmt"
+	"io"
 	"net"
 
 	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/container"
 	dockerClient "github.com/docker/docker/client"
 	"github.com/go-zoox/command/terminal"
 )
@@ -84,4 +87,22 @@ func (t *Terminal) ExitCode() int {
 	}
 
 	return inspect.State.ExitCode
+}
+
+func (rt *Terminal) Wait() error {
+	resultC, errC := rt.Client.ContainerWait(rt.Ctx, rt.ContainerID, container.WaitConditionNotRunning)
+	select {
+	case err := <-errC:
+		if err != nil && err != io.EOF {
+			return fmt.Errorf("container exit error: %#v", err)
+		}
+
+	case result := <-resultC:
+		if result.StatusCode != 0 {
+			// rt.exitCode = int(result.StatusCode)
+			return fmt.Errorf("container exited with non-zero status: %d", result.StatusCode)
+		}
+	}
+
+	return nil
 }
