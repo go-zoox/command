@@ -13,6 +13,7 @@ import (
 	"github.com/go-zoox/cli"
 	"github.com/go-zoox/command"
 	"github.com/go-zoox/command/terminal"
+	"github.com/go-zoox/fs"
 
 	"golang.org/x/term"
 )
@@ -41,6 +42,7 @@ func Exec(app *cli.MultipleProgram) {
 				Usage:   "the command workdir",
 				Aliases: []string{"w"},
 				EnvVars: []string{"WORKDIR"},
+				Value:   fs.CurrentDir(),
 			},
 			&cli.StringFlag{
 				Name:    "user",
@@ -66,15 +68,35 @@ func Exec(app *cli.MultipleProgram) {
 				Aliases: []string{"t"},
 				EnvVars: []string{"TTY"},
 			},
+			&cli.Int64Flag{
+				Name:    "memory",
+				Usage:   `Memory limit, unit: MB`,
+				Aliases: []string{"m"},
+				EnvVars: []string{"MEMORY"},
+			},
+			&cli.Float64Flag{
+				Name:    "cpu",
+				Usage:   `CPU limit, unit: core`,
+				EnvVars: []string{"CPU"},
+			},
+			&cli.StringFlag{
+				Name:    "platform",
+				Usage:   `Command platform, available: linux/amd64, linux/arm64`,
+				Aliases: []string{"p"},
+				EnvVars: []string{"PLATFORM"},
+			},
 		},
 		Action: func(ctx *cli.Context) (err error) {
 			cmd, err := command.New(context.Background(), &command.Config{
-				Engine:  ctx.String("engine"),
-				Command: ctx.String("command"),
-				WorkDir: ctx.String("workdir"),
-				User:    ctx.String("user"),
-				Shell:   ctx.String("shell"),
-				Image:   ctx.String("image"),
+				Engine:   ctx.String("engine"),
+				Command:  ctx.String("command"),
+				WorkDir:  ctx.String("workdir"),
+				User:     ctx.String("user"),
+				Shell:    ctx.String("shell"),
+				Image:    ctx.String("image"),
+				Memory:   ctx.Int64("memory"),
+				CPU:      ctx.Float64("cpu"),
+				Platform: ctx.String("platform"),
 			})
 			if err != nil {
 				return err

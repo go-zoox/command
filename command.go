@@ -37,6 +37,12 @@ type Config struct {
 
 	// engine = docker
 	Image string
+	// Memory is the memory limit, unit: MB
+	Memory int64
+	// CPU is the CPU limit, unit: core
+	CPU float64
+	// Platform is the command platform, available: linux/amd64, linux/arm64
+	Platform string
 }
 
 // New creates a new command runner.
@@ -70,6 +76,9 @@ func New(ctx context.Context, cfg *Config) (cmd Command, err error) {
 			User:        cfg.User,
 			Shell:       cfg.Shell,
 			Image:       cfg.Image,
+			Memory:      cfg.Memory,
+			CPU:         cfg.CPU,
+			Platform:    cfg.Platform,
 		})
 		if err != nil {
 			return nil, err
