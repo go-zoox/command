@@ -94,7 +94,7 @@ func New(ctx context.Context, cfg *Config) (cmd Command, err error) {
 	var engine engine.Engine
 	switch cfg.Engine {
 	case host.Name:
-		engine, err = host.New(ctx, &host.Config{
+		engine, err = host.New(&host.Config{
 			ID: cfg.ID,
 			//
 			Command:     cfg.Command,
@@ -109,7 +109,7 @@ func New(ctx context.Context, cfg *Config) (cmd Command, err error) {
 			return nil, err
 		}
 	case docker.Name:
-		engine, err = docker.New(ctx, &docker.Config{
+		engine, err = docker.New(&docker.Config{
 			ID: cfg.ID,
 			//
 			Command:        cfg.Command,
@@ -130,6 +130,11 @@ func New(ctx context.Context, cfg *Config) (cmd Command, err error) {
 	default:
 		return nil, fmt.Errorf("unsupported command engine: %s", cfg.Engine)
 	}
+
+	go func() {
+		<-ctx.Done()
+		engine.Cancel()
+	}()
 
 	return &command{
 		engine: engine,

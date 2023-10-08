@@ -1,6 +1,7 @@
 package docker
 
 import (
+	"context"
 	"io"
 	"net"
 
@@ -9,7 +10,7 @@ import (
 
 // Start starts the command.
 func (d *docker) Start() error {
-	stream, err := d.client.ContainerAttach(d.ctx, d.container.ID, types.ContainerAttachOptions{
+	stream, err := d.client.ContainerAttach(context.Background(), d.container.ID, types.ContainerAttachOptions{
 		Stream: true,
 		Stdin:  true,
 		Stdout: true,
@@ -32,7 +33,7 @@ func (d *docker) Start() error {
 		return nil
 	}
 
-	err = d.client.ContainerStart(d.ctx, d.container.ID, types.ContainerStartOptions{})
+	err = d.client.ContainerStart(context.Background(), d.container.ID, types.ContainerStartOptions{})
 	if err != nil {
 		return err
 	}

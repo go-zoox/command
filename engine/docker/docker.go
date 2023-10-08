@@ -1,7 +1,6 @@
 package docker
 
 import (
-	"context"
 	"fmt"
 	"io"
 	"os"
@@ -21,7 +20,7 @@ type docker struct {
 	args []string
 	env  []string
 	//
-	ctx context.Context
+	// ctx context.Context
 	//
 	client *client.Client
 	//
@@ -34,7 +33,7 @@ type docker struct {
 }
 
 // New creates a new docker engine.
-func New(ctx context.Context, cfg *Config) (engine.Engine, error) {
+func New(cfg *Config) (engine.Engine, error) {
 	if cfg.Image == "" {
 		cfg.Image = "whatwewant/zmicro:v1"
 	}
@@ -48,7 +47,6 @@ func New(ctx context.Context, cfg *Config) (engine.Engine, error) {
 	}
 
 	d := &docker{
-		ctx: ctx,
 		cfg: cfg,
 		//
 		stdin:  os.Stdin,

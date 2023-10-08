@@ -27,13 +27,12 @@ type host struct {
 }
 
 // New creates a new host engine.
-func New(ctx context.Context, cfg *Config) (engine.Engine, error) {
+func New(cfg *Config) (engine.Engine, error) {
 	if cfg.Shell == "" {
 		cfg.Shell = "/bin/sh"
 	}
 
 	h := &host{
-		ctx: ctx,
 		cfg: cfg,
 		//
 		stdin:  os.Stdin,

@@ -1,6 +1,7 @@
 package docker
 
 import (
+	"context"
 	"fmt"
 	"io"
 
@@ -10,7 +11,7 @@ import (
 
 // Wait waits for the command to finish.
 func (d *docker) Wait() error {
-	result, err := d.client.ContainerWait(d.ctx, d.container.ID, container.WaitConditionNotRunning)
+	result, err := d.client.ContainerWait(context.Background(), d.container.ID, container.WaitConditionNotRunning)
 	select {
 	case err := <-err:
 		if err != nil && err != io.EOF {

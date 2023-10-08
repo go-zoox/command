@@ -15,7 +15,7 @@ import (
 
 // Terminal returns a terminal.
 func (d *docker) Terminal() (terminal.Terminal, error) {
-	stream, err := d.client.ContainerAttach(d.ctx, d.container.ID, types.ContainerAttachOptions{
+	stream, err := d.client.ContainerAttach(context.Background(), d.container.ID, types.ContainerAttachOptions{
 		Stream: true,
 		Stdin:  true,
 		Stdout: true,
@@ -27,13 +27,13 @@ func (d *docker) Terminal() (terminal.Terminal, error) {
 	}
 
 	t := &Terminal{
-		Ctx:         d.ctx,
+		Ctx:         context.Background(),
 		Client:      d.client,
 		ContainerID: d.container.ID,
 		Conn:        stream.Conn,
 	}
 
-	err = d.client.ContainerStart(d.ctx, d.container.ID, types.ContainerStartOptions{})
+	err = d.client.ContainerStart(context.Background(), d.container.ID, types.ContainerStartOptions{})
 	if err != nil {
 		return nil, err
 	}

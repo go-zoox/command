@@ -1,6 +1,7 @@
 package docker
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/docker/docker/api/types"
@@ -83,7 +84,7 @@ func (d *docker) create() (err error) {
 		EndpointsConfig: map[string]*network.EndpointSettings{},
 	}
 	if d.cfg.Network != "" {
-		networkIns, err := d.client.NetworkInspect(d.ctx, d.cfg.Network, types.NetworkInspectOptions{})
+		networkIns, err := d.client.NetworkInspect(context.Background(), d.cfg.Network, types.NetworkInspectOptions{})
 		if err != nil {
 			return err
 		}
@@ -109,7 +110,7 @@ func (d *docker) create() (err error) {
 		platformCfg.Architecture = osArch[1]
 	}
 
-	d.container, err = d.client.ContainerCreate(d.ctx, cfg, hostCfg, networkCfg, platformCfg, d.cfg.ID)
+	d.container, err = d.client.ContainerCreate(context.Background(), cfg, hostCfg, networkCfg, platformCfg, d.cfg.ID)
 	if err != nil {
 		return err
 	}
