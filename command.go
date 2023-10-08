@@ -29,12 +29,18 @@ type Command interface {
 
 // Config is the command config
 type Config struct {
-	Engine      string
+	// Engine is the command engine, available: host, docker
+	Engine string
+
+	// engine common
 	Command     string
 	WorkDir     string
 	Environment map[string]string
 	User        string
 	Shell       string
+
+	// engine = host
+	IsHistoryDisabled bool
 
 	// engine = docker
 	Image string
@@ -96,6 +102,8 @@ func New(ctx context.Context, cfg *Config) (cmd Command, err error) {
 			Environment: environment,
 			User:        cfg.User,
 			Shell:       cfg.Shell,
+			//
+			IsHistoryDisabled: cfg.IsHistoryDisabled,
 		})
 		if err != nil {
 			return nil, err
