@@ -2,12 +2,14 @@ package docker
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"os"
 
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
 	"github.com/go-zoox/command/engine"
+	"github.com/go-zoox/uuid"
 )
 
 // Name is the name of the engine.
@@ -39,6 +41,10 @@ func New(ctx context.Context, cfg *Config) (engine.Engine, error) {
 
 	if cfg.Shell == "" {
 		cfg.Shell = "/bin/sh"
+	}
+
+	if cfg.ID == "" {
+		cfg.ID = fmt.Sprintf("go-zoox_command_%s", uuid.V4())
 	}
 
 	d := &docker{

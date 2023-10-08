@@ -10,4 +10,7 @@ type Config struct {
 
 	//
 	IsHistoryDisabled bool
+
+	// Custom Command Runner ID
+	ID string
 }

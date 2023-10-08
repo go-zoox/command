@@ -10,7 +10,6 @@ import (
 	"github.com/docker/docker/client"
 	"github.com/go-zoox/core-utils/cast"
 	"github.com/go-zoox/core-utils/strings"
-	"github.com/go-zoox/uuid"
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
 )
 
@@ -110,8 +109,7 @@ func (d *docker) create() (err error) {
 		platformCfg.Architecture = osArch[1]
 	}
 
-	containerName := fmt.Sprintf("go-zoox_command_%s", uuid.V4())
-	d.container, err = d.client.ContainerCreate(d.ctx, cfg, hostCfg, networkCfg, platformCfg, containerName)
+	d.container, err = d.client.ContainerCreate(d.ctx, cfg, hostCfg, networkCfg, platformCfg, d.cfg.ID)
 	if err != nil {
 		return err
 	}

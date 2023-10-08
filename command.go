@@ -9,6 +9,7 @@ import (
 	"github.com/go-zoox/command/engine/docker"
 	"github.com/go-zoox/command/engine/host"
 	"github.com/go-zoox/command/terminal"
+	"github.com/go-zoox/uuid"
 )
 
 // Command is the command runner interface
@@ -47,6 +48,9 @@ type Config struct {
 	Network string
 	// DisableNetwork disables network
 	DisableNetwork bool
+
+	// Custom Command Runner ID
+	ID string
 }
 
 // New creates a new command runner.
@@ -59,13 +63,37 @@ func New(ctx context.Context, cfg *Config) (cmd Command, err error) {
 		cfg.Shell = "/bin/sh"
 	}
 
+	if cfg.ID == "" {
+		cfg.ID = fmt.Sprintf("go-zoox_command_%s", uuid.V4())
+	}
+
+	environment := map[string]string{
+		"GO_ZOOX_COMMAND_ENGINE":          cfg.Engine,
+		"GO_ZOOX_COMMAND_ID":              cfg.ID,
+		"GO_ZOOX_COMMAND_SHELL":           cfg.Shell,
+		"GO_ZOOX_COMMAND_USER":            cfg.User,
+		"GO_ZOOX_COMMAND_WORKDIR":         cfg.WorkDir,
+		"GO_ZOOX_COMMAND_COMMAND":         cfg.Command,
+		"GO_ZOOX_COMMAND_IMAGE":           cfg.Image,
+		"GO_ZOOX_COMMAND_MEMORY":          fmt.Sprintf("%d", cfg.Memory),
+		"GO_ZOOX_COMMAND_CPU":             fmt.Sprintf("%f", cfg.CPU),
+		"GO_ZOOX_COMMAND_PLATFORM":        cfg.Platform,
+		"GO_ZOOX_COMMAND_NETWORK":         cfg.Network,
+		"GO_ZOOX_COMMAND_DISABLE_NETWORK": fmt.Sprintf("%t", cfg.DisableNetwork),
+	}
+	for k, v := range cfg.Environment {
+		environment[k] = v
+	}
+
 	var engine engine.Engine
 	switch cfg.Engine {
 	case host.Name:
 		engine, err = host.New(ctx, &host.Config{
+			ID: cfg.ID,
+			//
 			Command:     cfg.Command,
 			WorkDir:     cfg.WorkDir,
-			Environment: cfg.Environment,
+			Environment: environment,
 			User:        cfg.User,
 			Shell:       cfg.Shell,
 		})
@@ -74,9 +102,11 @@ func New(ctx context.Context, cfg *Config) (cmd Command, err error) {
 		}
 	case docker.Name:
 		engine, err = docker.New(ctx, &docker.Config{
+			ID: cfg.ID,
+			//
 			Command:        cfg.Command,
 			WorkDir:        cfg.WorkDir,
-			Environment:    cfg.Environment,
+			Environment:    environment,
 			User:           cfg.User,
 			Shell:          cfg.Shell,
 			Image:          cfg.Image,
