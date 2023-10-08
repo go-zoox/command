@@ -1,86 +1,133 @@
 package command
 
 import (
-	"encoding/json"
+	"context"
 	"fmt"
 	"io"
-	"os"
-	"os/exec"
+
+	"github.com/go-zoox/command/engine"
+	"github.com/go-zoox/command/engine/docker"
+	"github.com/go-zoox/command/engine/host"
+	"github.com/go-zoox/command/terminal"
+	"github.com/go-zoox/uuid"
 )
 
-// Command is better os/exec command
-type Command struct {
-	Script      string            `json:"content"`
-	Context     string            `json:"context"`
-	Environment map[string]string `json:"environment"`
-	Shell       string            `json:"shell"`
+// Command is the command runner interface
+type Command interface {
+	Start() error
+	Wait() error
+	Cancel() error
 	//
-	Stdout io.Writer
-	Stderr io.Writer
+	Run() error
 	//
-	cmd *exec.Cmd
+	SetStdin(stdin io.Reader) error
+	SetStdout(stdout io.Writer) error
+	SetStderr(stderr io.Writer) error
+	//
+	Terminal() (terminal.Terminal, error)
 }
 
-// Run runs the command
-func (c *Command) Run() error {
-	environment := os.Environ()
+// Config is the command config
+type Config struct {
+	Engine      string
+	Command     string
+	WorkDir     string
+	Environment map[string]string
+	User        string
+	Shell       string
 
-	for k, v := range c.Environment {
-		environment = append(environment, fmt.Sprintf("%s=%s", k, v))
+	// engine = docker
+	Image string
+	// Memory is the memory limit, unit: MB
+	Memory int64
+	// CPU is the CPU limit, unit: core
+	CPU float64
+	// Platform is the command platform, available: linux/amd64, linux/arm64
+	Platform string
+	// Network is the network name
+	Network string
+	// DisableNetwork disables network
+	DisableNetwork bool
+
+	// Custom Command Runner ID
+	ID string
+}
+
+// New creates a new command runner.
+func New(ctx context.Context, cfg *Config) (cmd Command, err error) {
+	if cfg.Engine == "" {
+		cfg.Engine = host.Name
 	}
 
-	shell := c.Shell
-	if shell == "" {
-		shell = os.Getenv("SHELL")
-		if shell == "" {
-			shell = "sh"
+	if cfg.Shell == "" {
+		cfg.Shell = "/bin/sh"
+	}
+
+	if cfg.ID == "" {
+		cfg.ID = fmt.Sprintf("go-zoox_command_%s", uuid.V4())
+	}
+
+	environment := map[string]string{
+		"GO_ZOOX_COMMAND_ENGINE":          cfg.Engine,
+		"GO_ZOOX_COMMAND_ID":              cfg.ID,
+		"GO_ZOOX_COMMAND_SHELL":           cfg.Shell,
+		"GO_ZOOX_COMMAND_USER":            cfg.User,
+		"GO_ZOOX_COMMAND_WORKDIR":         cfg.WorkDir,
+		"GO_ZOOX_COMMAND_COMMAND":         cfg.Command,
+		"GO_ZOOX_COMMAND_IMAGE":           cfg.Image,
+		"GO_ZOOX_COMMAND_MEMORY":          fmt.Sprintf("%d", cfg.Memory),
+		"GO_ZOOX_COMMAND_CPU":             fmt.Sprintf("%f", cfg.CPU),
+		"GO_ZOOX_COMMAND_PLATFORM":        cfg.Platform,
+		"GO_ZOOX_COMMAND_NETWORK":         cfg.Network,
+		"GO_ZOOX_COMMAND_DISABLE_NETWORK": fmt.Sprintf("%t", cfg.DisableNetwork),
+	}
+	for k, v := range cfg.Environment {
+		environment[k] = v
+	}
+
+	var engine engine.Engine
+	switch cfg.Engine {
+	case host.Name:
+		engine, err = host.New(ctx, &host.Config{
+			ID: cfg.ID,
+			//
+			Command:     cfg.Command,
+			WorkDir:     cfg.WorkDir,
+			Environment: environment,
+			User:        cfg.User,
+			Shell:       cfg.Shell,
+		})
+		if err != nil {
+			return nil, err
 		}
+	case docker.Name:
+		engine, err = docker.New(ctx, &docker.Config{
+			ID: cfg.ID,
+			//
+			Command:        cfg.Command,
+			WorkDir:        cfg.WorkDir,
+			Environment:    environment,
+			User:           cfg.User,
+			Shell:          cfg.Shell,
+			Image:          cfg.Image,
+			Memory:         cfg.Memory,
+			CPU:            cfg.CPU,
+			Platform:       cfg.Platform,
+			Network:        cfg.Network,
+			DisableNetwork: cfg.DisableNetwork,
+		})
+		if err != nil {
+			return nil, err
+		}
+	default:
+		return nil, fmt.Errorf("unsupported command engine: %s", cfg.Engine)
 	}
 
-	cmd := exec.Command(shell, "-c", c.Script)
-	cmd.Dir = c.Context
-	cmd.Env = environment
-
-	cmd.Stdout = c.Stdout
-	if cmd.Stdout == nil {
-		cmd.Stdout = os.Stdout
-	}
-
-	cmd.Stderr = c.Stderr
-	if cmd.Stderr == nil {
-		cmd.Stderr = os.Stderr
-	}
-
-	c.cmd = cmd
-
-	if err := cmd.Run(); err != nil {
-		return err
-	}
-
-	return nil
+	return &command{
+		engine: engine,
+	}, nil
 }
 
-// Config gets the config of command
-func (c *Command) Config() (string, error) {
-	cfg, err := json.MarshalIndent(c, "", " ")
-	if err != nil {
-		return "", err
-	}
-
-	return string(cfg), nil
-}
-
-// MustConfig gets the config of command
-func (c *Command) MustConfig() string {
-	cfg, err := c.Config()
-	if err != nil {
-		return ""
-	}
-
-	return cfg
-}
-
-// ExitCode gets the exit code of process
-func (c *Command) ExitCode() int {
-	return c.cmd.ProcessState.ExitCode()
+type command struct {
+	engine engine.Engine
 }
