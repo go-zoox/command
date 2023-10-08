@@ -9,6 +9,7 @@ import (
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	dockerClient "github.com/docker/docker/client"
+	"github.com/go-zoox/command/errors"
 	"github.com/go-zoox/command/terminal"
 )
 
@@ -107,8 +108,11 @@ func (t *Terminal) Wait() error {
 
 	case result := <-resultC:
 		if result.StatusCode != 0 {
-			// rt.exitCode = int(result.StatusCode)
-			return fmt.Errorf("container exited with non-zero status: %d", result.StatusCode)
+			// return fmt.Errorf("container exited with non-zero status: %d", result.StatusCode)
+			return &errors.ExitError{
+				Code:    int(result.StatusCode),
+				Message: fmt.Sprintf("container exited with non-zero status: %d", result.StatusCode),
+			}
 		}
 	}
 
