@@ -110,7 +110,8 @@ func (d *docker) create() (err error) {
 		platformCfg.Architecture = osArch[1]
 	}
 
-	d.container, err = d.client.ContainerCreate(d.ctx, cfg, hostCfg, networkCfg, platformCfg, uuid.V4())
+	containerName := fmt.Sprintf("go-zoox_command_%s", uuid.V4())
+	d.container, err = d.client.ContainerCreate(d.ctx, cfg, hostCfg, networkCfg, platformCfg, containerName)
 	if err != nil {
 		return err
 	}
