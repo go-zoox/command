@@ -110,6 +110,48 @@ func Exec(app *cli.MultipleProgram) {
 				Usage:   `Client Secret for Server Auth`,
 				EnvVars: []string{"CLIENT_SECRET"},
 			},
+			// ssh
+			&cli.StringFlag{
+				Name:    "ssh-host",
+				Usage:   "SSH host",
+				EnvVars: []string{"SSH_HOST"},
+			},
+			&cli.IntFlag{
+				Name:    "ssh-port",
+				Usage:   "SSH port",
+				EnvVars: []string{"SSH_PORT"},
+				Value:   22,
+			},
+			&cli.StringFlag{
+				Name:    "ssh-user",
+				Usage:   "SSH user",
+				EnvVars: []string{"SSH_USER"},
+			},
+			&cli.StringFlag{
+				Name:    "ssh-pass",
+				Usage:   "SSH password",
+				EnvVars: []string{"SSH_PASS"},
+			},
+			&cli.StringFlag{
+				Name:    "ssh-private-key",
+				Usage:   "SSH private key",
+				EnvVars: []string{"SSH_PRIVATE_KEY"},
+			},
+			&cli.StringFlag{
+				Name:    "ssh-private-key-secret",
+				Usage:   "SSH private key secret",
+				EnvVars: []string{"SSH_PRIVATE_KEY_SECRET"},
+			},
+			&cli.BoolFlag{
+				Name:    "ssh-is-ignore-strict-host-key-checking",
+				Usage:   "SSH is ignore strict host key checking",
+				EnvVars: []string{"SSH_IS_IGNORE_STRICT_HOST_KEY_CHECKING"},
+			},
+			&cli.StringFlag{
+				Name:    "ssh-know-hosts-file-path",
+				Usage:   "SSH know hosts file path",
+				EnvVars: []string{"SSH_KNOW_HOSTS_FILE_PATH"},
+			},
 		},
 		Action: func(ctx *cli.Context) (err error) {
 			cmd, err := command.New(&command.Config{
@@ -128,6 +170,15 @@ func Exec(app *cli.MultipleProgram) {
 				Server:       ctx.String("server"),
 				ClientID:     ctx.String("client-id"),
 				ClientSecret: ctx.String("client-secret"),
+				//
+				SSHHost:                          ctx.String("ssh-host"),
+				SSHPort:                          ctx.Int("ssh-port"),
+				SSHUser:                          ctx.String("ssh-user"),
+				SSHPass:                          ctx.String("ssh-pass"),
+				SSHPrivateKey:                    ctx.String("ssh-private-key"),
+				SSHPrivateKeySecret:              ctx.String("ssh-private-key-secret"),
+				SSHIsIgnoreStrictHostKeyChecking: ctx.Bool("ssh-is-ignore-strict-host-key-checking"),
+				SSHKnowHostsFilePath:             ctx.String("ssh-know-hosts-file-path"),
 			})
 			if err != nil {
 				return err

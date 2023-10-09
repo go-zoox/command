@@ -15,6 +15,7 @@ require (
 	github.com/go-zoox/uuid v0.0.1
 	github.com/opencontainers/image-spec v1.0.2
 	github.com/spf13/cast v1.5.1
+	golang.org/x/crypto v0.13.0
 	golang.org/x/term v0.12.0
 )
 
