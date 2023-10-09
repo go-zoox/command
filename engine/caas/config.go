@@ -1,5 +1,6 @@
 package caas
 
+// Config represents the configuration for the engine.
 type Config struct {
 	Command     string
 	Environment map[string]string

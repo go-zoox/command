@@ -23,6 +23,7 @@ type caas struct {
 	stderr io.Writer
 }
 
+// New creates a new caas engine.
 func New(cfg *Config) (engine.Engine, error) {
 	c := &caas{
 		cfg: cfg,
