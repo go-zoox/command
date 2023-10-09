@@ -7,6 +7,7 @@ import (
 
 	"github.com/go-zoox/command/engine"
 	"github.com/go-zoox/command/engine/caas"
+	"github.com/go-zoox/command/engine/dind"
 	"github.com/go-zoox/command/engine/docker"
 	"github.com/go-zoox/command/engine/host"
 	"github.com/go-zoox/command/terminal"
@@ -57,6 +58,8 @@ type Config struct {
 	Network string
 	// DisableNetwork disables network
 	DisableNetwork bool
+	// Privileged enables privileged mode
+	Privileged bool
 
 	// engine = caas
 	// Server is the command server address
@@ -138,6 +141,7 @@ func New(cfg *Config) (cmd Command, err error) {
 			Platform:       cfg.Platform,
 			Network:        cfg.Network,
 			DisableNetwork: cfg.DisableNetwork,
+			Privileged:     cfg.Privileged,
 		})
 		if err != nil {
 			return nil, err
@@ -155,6 +159,25 @@ func New(cfg *Config) (cmd Command, err error) {
 			Server:       cfg.Server,
 			ClientID:     cfg.ClientID,
 			ClientSecret: cfg.ClientSecret,
+		})
+		if err != nil {
+			return nil, err
+		}
+	case dind.Name:
+		engine, err = dind.New(&dind.Config{
+			ID: cfg.ID,
+			//
+			Command:        cfg.Command,
+			WorkDir:        cfg.WorkDir,
+			Environment:    environment,
+			User:           cfg.User,
+			Shell:          cfg.Shell,
+			Image:          cfg.Image,
+			Memory:         cfg.Memory,
+			CPU:            cfg.CPU,
+			Platform:       cfg.Platform,
+			Network:        cfg.Network,
+			DisableNetwork: cfg.DisableNetwork,
 		})
 		if err != nil {
 			return nil, err

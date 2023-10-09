@@ -1,21 +1,19 @@
-package host
+package dind
 
 import (
 	"io"
 	"os"
-	"os/exec"
 
 	"github.com/go-zoox/command/engine"
 )
 
 // Name is the name of the engine.
-const Name = "host"
+const Name = "dind"
 
-type host struct {
+type dind struct {
 	cfg *Config
 	//
-	cmd *exec.Cmd
-	//
+	client engine.Engine
 
 	//
 	stdin  io.Reader
@@ -23,13 +21,11 @@ type host struct {
 	stderr io.Writer
 }
 
-// New creates a new host engine.
+// New creates a new dind engine.
 func New(cfg *Config) (engine.Engine, error) {
-	if cfg.Shell == "" {
-		cfg.Shell = "/bin/sh"
-	}
+	cfg.Image = "whatwewant/dind:v24-1"
 
-	h := &host{
+	d := &dind{
 		cfg: cfg,
 		//
 		stdin:  os.Stdin,
@@ -37,9 +33,9 @@ func New(cfg *Config) (engine.Engine, error) {
 		stderr: os.Stderr,
 	}
 
-	if err := h.create(); err != nil {
+	if err := d.create(); err != nil {
 		return nil, err
 	}
 
-	return h, nil
+	return d, nil
 }
