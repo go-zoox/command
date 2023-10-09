@@ -37,6 +37,7 @@ func (s *ssh) Terminal() (terminal.Terminal, error) {
 	}, nil
 }
 
+// Terminal is a terminal.
 type Terminal struct {
 	terminal.Terminal
 
