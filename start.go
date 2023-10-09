@@ -8,5 +8,9 @@ func (c *command) Start() error {
 		return errors.New("engine not set")
 	}
 
+	if c.cfg.Command == "" {
+		return errors.New("command is required")
+	}
+
 	return c.engine.Start()
 }
