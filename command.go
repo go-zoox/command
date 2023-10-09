@@ -6,6 +6,7 @@ import (
 	"io"
 
 	"github.com/go-zoox/command/engine"
+	"github.com/go-zoox/command/engine/caas"
 	"github.com/go-zoox/command/engine/docker"
 	"github.com/go-zoox/command/engine/host"
 	"github.com/go-zoox/command/terminal"
@@ -56,6 +57,14 @@ type Config struct {
 	Network string
 	// DisableNetwork disables network
 	DisableNetwork bool
+
+	// engine = caas
+	// Server is the command server address
+	Server string
+	// ClientID is the client ID for server auth
+	ClientID string
+	// ClientSecret is the client secret for server auth
+	ClientSecret string
 
 	// Custom Command Runner ID
 	ID string
@@ -133,6 +142,23 @@ func New(cfg *Config) (cmd Command, err error) {
 		if err != nil {
 			return nil, err
 		}
+	case caas.Name:
+		engine, err = caas.New(&caas.Config{
+			ID: cfg.ID,
+			//
+			Command:     cfg.Command,
+			WorkDir:     cfg.WorkDir,
+			Environment: environment,
+			User:        cfg.User,
+			Shell:       cfg.Shell,
+			//
+			Server:       cfg.Server,
+			ClientID:     cfg.ClientID,
+			ClientSecret: cfg.ClientSecret,
+		})
+		if err != nil {
+			return nil, err
+		}
 	default:
 		return nil, fmt.Errorf("unsupported command engine: %s", cfg.Engine)
 	}
@@ -143,10 +169,13 @@ func New(cfg *Config) (cmd Command, err error) {
 	}()
 
 	return &command{
+		cfg:    cfg,
 		engine: engine,
 	}, nil
 }
 
 type command struct {
+	cfg *Config
+	//
 	engine engine.Engine
 }
