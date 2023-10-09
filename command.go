@@ -7,8 +7,10 @@ import (
 
 	"github.com/go-zoox/command/engine"
 	"github.com/go-zoox/command/engine/caas"
+	"github.com/go-zoox/command/engine/dind"
 	"github.com/go-zoox/command/engine/docker"
 	"github.com/go-zoox/command/engine/host"
+	"github.com/go-zoox/command/engine/ssh"
 	"github.com/go-zoox/command/terminal"
 	"github.com/go-zoox/uuid"
 )
@@ -57,6 +59,8 @@ type Config struct {
 	Network string
 	// DisableNetwork disables network
 	DisableNetwork bool
+	// Privileged enables privileged mode
+	Privileged bool
 
 	// engine = caas
 	// Server is the command server address
@@ -65,6 +69,16 @@ type Config struct {
 	ClientID string
 	// ClientSecret is the client secret for server auth
 	ClientSecret string
+
+	// engine = ssh
+	SSHHost                          string
+	SSHPort                          int
+	SSHUser                          string
+	SSHPass                          string
+	SSHPrivateKey                    string
+	SSHPrivateKeySecret              string
+	SSHIsIgnoreStrictHostKeyChecking bool
+	SSHKnowHostsFilePath             string
 
 	// Custom Command Runner ID
 	ID string
@@ -138,6 +152,7 @@ func New(cfg *Config) (cmd Command, err error) {
 			Platform:       cfg.Platform,
 			Network:        cfg.Network,
 			DisableNetwork: cfg.DisableNetwork,
+			Privileged:     cfg.Privileged,
 		})
 		if err != nil {
 			return nil, err
@@ -155,6 +170,48 @@ func New(cfg *Config) (cmd Command, err error) {
 			Server:       cfg.Server,
 			ClientID:     cfg.ClientID,
 			ClientSecret: cfg.ClientSecret,
+		})
+		if err != nil {
+			return nil, err
+		}
+	case dind.Name:
+		engine, err = dind.New(&dind.Config{
+			ID: cfg.ID,
+			//
+			Command:        cfg.Command,
+			WorkDir:        cfg.WorkDir,
+			Environment:    environment,
+			User:           cfg.User,
+			Shell:          cfg.Shell,
+			Image:          cfg.Image,
+			Memory:         cfg.Memory,
+			CPU:            cfg.CPU,
+			Platform:       cfg.Platform,
+			Network:        cfg.Network,
+			DisableNetwork: cfg.DisableNetwork,
+		})
+		if err != nil {
+			return nil, err
+		}
+	case ssh.Name:
+		engine, err = ssh.New(&ssh.Config{
+			ID: cfg.ID,
+			//
+			Command:     cfg.Command,
+			WorkDir:     cfg.WorkDir,
+			Environment: environment,
+			// User:        cfg.User,
+			Shell: cfg.Shell,
+			//
+			Host:             cfg.SSHHost,
+			Port:             cfg.SSHPort,
+			User:             cfg.SSHUser,
+			Pass:             cfg.SSHPass,
+			PrivateKey:       cfg.SSHPrivateKey,
+			PrivateKeySecret: cfg.SSHPrivateKeySecret,
+			//
+			IsIgnoreStrictHostKeyChecking: cfg.SSHIsIgnoreStrictHostKeyChecking,
+			KnowHostsFilePath:             cfg.SSHKnowHostsFilePath,
 		})
 		if err != nil {
 			return nil, err

@@ -4,11 +4,13 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/docker/cli/cli/streams"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/client"
+	"github.com/docker/docker/pkg/jsonmessage"
 	"github.com/go-zoox/core-utils/cast"
 	"github.com/go-zoox/core-utils/strings"
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
@@ -59,6 +61,7 @@ func (d *docker) create() (err error) {
 			// },
 		},
 		// NetworkMode: "none",
+		Privileged: d.cfg.Privileged,
 	}
 	if d.cfg.Memory != 0 {
 		hostCfg.Resources.Memory = d.cfg.Memory * 1024 * 1024
@@ -108,6 +111,18 @@ func (d *docker) create() (err error) {
 		osArch := strings.Split(d.cfg.Platform, "/")
 		platformCfg.OS = osArch[0]
 		platformCfg.Architecture = osArch[1]
+	}
+
+	imagePullReader, err := d.client.ImagePull(context.Background(), d.cfg.Image, types.ImagePullOptions{
+		Platform: d.cfg.Platform,
+	})
+	if err != nil {
+		return err
+	}
+	defer imagePullReader.Close()
+
+	if err := jsonmessage.DisplayJSONMessagesToStream(imagePullReader, streams.NewOut(d.stdout), nil); err != nil {
+		return err
 	}
 
 	d.container, err = d.client.ContainerCreate(context.Background(), cfg, hostCfg, networkCfg, platformCfg, d.cfg.ID)

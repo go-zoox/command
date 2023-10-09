@@ -1,0 +1,43 @@
+package ssh
+
+import (
+	"io"
+
+	sshx "golang.org/x/crypto/ssh"
+)
+
+// Start starts the command without waiting for it to finish.
+func (s *ssh) Start() error {
+	if err := applyStdin(s.session, s.stdin); err != nil {
+		return nil
+	}
+
+	if err := applyStdout(s.session, s.stdout); err != nil {
+		return nil
+	}
+
+	if err := applyStderr(s.session, s.stderr); err != nil {
+		return nil
+	}
+
+	return s.session.Start(s.cfg.Command)
+}
+
+func applyStdin(cmd *sshx.Session, stdin io.Reader) error {
+	cmd.Stdin = stdin
+	return nil
+}
+
+func applyStdout(cmd *sshx.Session, stdout io.Writer) error {
+	cmd.Stdout = stdout
+	if cmd.Stderr == nil {
+		return applyStderr(cmd, stdout)
+	}
+
+	return nil
+}
+
+func applyStderr(cmd *sshx.Session, stderr io.Writer) error {
+	cmd.Stderr = stderr
+	return nil
+}

@@ -1,4 +1,4 @@
-package docker
+package dind
 
 // Config is the configuration for a Docker engine.
 type Config struct {
@@ -20,8 +20,6 @@ type Config struct {
 	Network string
 	// DisableNetwork disables network
 	DisableNetwork bool
-	//
-	Privileged bool
 
 	// Custom Command Runner ID
 	ID string
