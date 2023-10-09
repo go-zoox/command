@@ -20,6 +20,8 @@ type Config struct {
 	Network string
 	// DisableNetwork disables network
 	DisableNetwork bool
+	//
+	Privileged bool
 
 	// Custom Command Runner ID
 	ID string

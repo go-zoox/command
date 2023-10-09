@@ -3,6 +3,7 @@ package docker
 import (
 	"context"
 	"fmt"
+	"io"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
@@ -59,6 +60,7 @@ func (d *docker) create() (err error) {
 			// },
 		},
 		// NetworkMode: "none",
+		Privileged: d.cfg.Privileged,
 	}
 	if d.cfg.Memory != 0 {
 		hostCfg.Resources.Memory = d.cfg.Memory * 1024 * 1024
@@ -108,6 +110,17 @@ func (d *docker) create() (err error) {
 		osArch := strings.Split(d.cfg.Platform, "/")
 		platformCfg.OS = osArch[0]
 		platformCfg.Architecture = osArch[1]
+	}
+
+	pullReader, err := d.client.ImagePull(context.Background(), d.cfg.Image, types.ImagePullOptions{
+		Platform: d.cfg.Platform,
+	})
+	if err != nil {
+		return err
+	}
+	_, err = io.Copy(d.stdout, pullReader)
+	if err != nil {
+		return err
 	}
 
 	d.container, err = d.client.ContainerCreate(context.Background(), cfg, hostCfg, networkCfg, platformCfg, d.cfg.ID)
