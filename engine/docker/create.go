@@ -3,13 +3,14 @@ package docker
 import (
 	"context"
 	"fmt"
-	"io"
 
+	"github.com/docker/cli/cli/streams"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/client"
+	"github.com/docker/docker/pkg/jsonmessage"
 	"github.com/go-zoox/core-utils/cast"
 	"github.com/go-zoox/core-utils/strings"
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
@@ -112,14 +113,15 @@ func (d *docker) create() (err error) {
 		platformCfg.Architecture = osArch[1]
 	}
 
-	pullReader, err := d.client.ImagePull(context.Background(), d.cfg.Image, types.ImagePullOptions{
+	imagePullReader, err := d.client.ImagePull(context.Background(), d.cfg.Image, types.ImagePullOptions{
 		Platform: d.cfg.Platform,
 	})
 	if err != nil {
 		return err
 	}
-	_, err = io.Copy(d.stdout, pullReader)
-	if err != nil {
+	defer imagePullReader.Close()
+
+	if err := jsonmessage.DisplayJSONMessagesToStream(imagePullReader, streams.NewOut(d.stdout), nil); err != nil {
 		return err
 	}
 
