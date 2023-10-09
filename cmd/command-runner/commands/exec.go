@@ -1,7 +1,6 @@
 package commands
 
 import (
-	"context"
 	"fmt"
 	"io"
 	"os"
@@ -26,7 +25,7 @@ func Exec(app *cli.MultipleProgram) {
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:    "engine",
-				Usage:   "command engine",
+				Usage:   "command engine, avaliable: host, docker, caas",
 				Aliases: []string{"e"},
 				EnvVars: []string{"ENGINE"},
 				Value:   "host",
@@ -96,9 +95,24 @@ func Exec(app *cli.MultipleProgram) {
 				Usage:   "Disable network visit",
 				EnvVars: []string{"DISABLE_NETWORK"},
 			},
+			&cli.StringFlag{
+				Name:    "server",
+				Usage:   "Command server address",
+				EnvVars: []string{"SERVER"},
+			},
+			&cli.StringFlag{
+				Name:    "client-id",
+				Usage:   `Client ID for Server Auth`,
+				EnvVars: []string{"CLIENT_ID"},
+			},
+			&cli.StringFlag{
+				Name:    "client-secret",
+				Usage:   `Client Secret for Server Auth`,
+				EnvVars: []string{"CLIENT_SECRET"},
+			},
 		},
 		Action: func(ctx *cli.Context) (err error) {
-			cmd, err := command.New(context.Background(), &command.Config{
+			cmd, err := command.New(&command.Config{
 				Engine:         ctx.String("engine"),
 				Command:        ctx.String("command"),
 				WorkDir:        ctx.String("workdir"),
@@ -110,6 +124,10 @@ func Exec(app *cli.MultipleProgram) {
 				Platform:       ctx.String("platform"),
 				Network:        ctx.String("network"),
 				DisableNetwork: ctx.Bool("disable-network"),
+				//
+				Server:       ctx.String("server"),
+				ClientID:     ctx.String("client-id"),
+				ClientSecret: ctx.String("client-secret"),
 			})
 			if err != nil {
 				return err
