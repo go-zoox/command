@@ -17,6 +17,8 @@ type Config struct {
 	Environment map[string]string
 	WorkDir     string
 	Shell       string
+	// ReadOnly means none-interactive for terminal, which is used for show log, like top
+	ReadOnly bool
 	//
 	Host             string
 	Port             int

@@ -7,6 +7,8 @@ type Config struct {
 	WorkDir     string
 	User        string
 	Shell       string
+	// ReadOnly means none-interactive for terminal, which is used for show log, like top
+	ReadOnly bool
 
 	// engine = docker
 	Image string
