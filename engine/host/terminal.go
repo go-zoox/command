@@ -16,15 +16,17 @@ func (h *host) Terminal() (terminal.Terminal, error) {
 	}
 
 	return &Terminal{
-		File: terminal,
-		Cmd:  h.cmd,
+		File:     terminal,
+		Cmd:      h.cmd,
+		ReadOnly: h.cfg.ReadOnly,
 	}, nil
 }
 
 // Terminal is the terminal implementation.
 type Terminal struct {
 	*os.File
-	Cmd *exec.Cmd
+	Cmd      *exec.Cmd
+	ReadOnly bool
 }
 
 // Close closes the terminal.
@@ -39,6 +41,9 @@ func (t *Terminal) Read(p []byte) (n int, err error) {
 
 // Write writes to the terminal.
 func (t *Terminal) Write(p []byte) (n int, err error) {
+	if t.ReadOnly {
+		return 0, nil
+	}
 	return t.File.Write(p)
 }
 

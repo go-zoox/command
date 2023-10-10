@@ -14,6 +14,7 @@ func (d *dind) create() (err error) {
 		Environment:    d.cfg.Environment,
 		User:           d.cfg.User,
 		Shell:          d.cfg.Shell,
+		ReadOnly:       d.cfg.ReadOnly,
 		Image:          d.cfg.Image,
 		Memory:         d.cfg.Memory,
 		CPU:            d.cfg.CPU,

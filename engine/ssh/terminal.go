@@ -34,6 +34,7 @@ func (s *ssh) Terminal() (terminal.Terminal, error) {
 	return &Terminal{
 		Session:      s.session,
 		SessionStdin: sessionStdin,
+		ReadOnly:     s.cfg.ReadOnly,
 	}, nil
 }
 
@@ -45,6 +46,8 @@ type Terminal struct {
 
 	// @TODO
 	SessionStdin io.WriteCloser
+
+	ReadOnly bool
 }
 
 // Resize resizes the terminal.
@@ -70,6 +73,10 @@ func (t *Terminal) Read(p []byte) (n int, err error) {
 
 // Write writes to the terminal.
 func (t *Terminal) Write(p []byte) (n int, err error) {
+	if t.ReadOnly {
+		return 0, nil
+	}
+
 	return t.SessionStdin.Write(p)
 }
 

@@ -43,6 +43,8 @@ type Config struct {
 	Environment map[string]string
 	User        string
 	Shell       string
+	// ReadOnly means none-interactive for terminal, which is used for show log, like top
+	ReadOnly bool
 
 	// engine = host
 	IsHistoryDisabled bool
@@ -132,6 +134,8 @@ func New(cfg *Config) (cmd Command, err error) {
 			User:        cfg.User,
 			Shell:       cfg.Shell,
 			//
+			ReadOnly: cfg.ReadOnly,
+			//
 			IsHistoryDisabled: cfg.IsHistoryDisabled,
 		})
 		if err != nil {
@@ -141,11 +145,14 @@ func New(cfg *Config) (cmd Command, err error) {
 		engine, err = docker.New(&docker.Config{
 			ID: cfg.ID,
 			//
-			Command:        cfg.Command,
-			WorkDir:        cfg.WorkDir,
-			Environment:    environment,
-			User:           cfg.User,
-			Shell:          cfg.Shell,
+			Command:     cfg.Command,
+			WorkDir:     cfg.WorkDir,
+			Environment: environment,
+			User:        cfg.User,
+			Shell:       cfg.Shell,
+			//
+			ReadOnly: cfg.ReadOnly,
+			//
 			Image:          cfg.Image,
 			Memory:         cfg.Memory,
 			CPU:            cfg.CPU,
@@ -167,6 +174,8 @@ func New(cfg *Config) (cmd Command, err error) {
 			User:        cfg.User,
 			Shell:       cfg.Shell,
 			//
+			ReadOnly: cfg.ReadOnly,
+			//
 			Server:       cfg.Server,
 			ClientID:     cfg.ClientID,
 			ClientSecret: cfg.ClientSecret,
@@ -178,11 +187,14 @@ func New(cfg *Config) (cmd Command, err error) {
 		engine, err = dind.New(&dind.Config{
 			ID: cfg.ID,
 			//
-			Command:        cfg.Command,
-			WorkDir:        cfg.WorkDir,
-			Environment:    environment,
-			User:           cfg.User,
-			Shell:          cfg.Shell,
+			Command:     cfg.Command,
+			WorkDir:     cfg.WorkDir,
+			Environment: environment,
+			User:        cfg.User,
+			Shell:       cfg.Shell,
+			//
+			ReadOnly: cfg.ReadOnly,
+			//
 			Image:          cfg.Image,
 			Memory:         cfg.Memory,
 			CPU:            cfg.CPU,
@@ -202,6 +214,8 @@ func New(cfg *Config) (cmd Command, err error) {
 			Environment: environment,
 			// User:        cfg.User,
 			Shell: cfg.Shell,
+			//
+			ReadOnly: cfg.ReadOnly,
 			//
 			Host:             cfg.SSHHost,
 			Port:             cfg.SSHPort,

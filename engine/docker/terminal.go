@@ -31,6 +31,7 @@ func (d *docker) Terminal() (terminal.Terminal, error) {
 		Client:      d.client,
 		ContainerID: d.container.ID,
 		Conn:        stream.Conn,
+		ReadOnly:    d.cfg.ReadOnly,
 	}
 
 	err = d.client.ContainerStart(context.Background(), d.container.ID, types.ContainerStartOptions{})
@@ -48,6 +49,8 @@ type Terminal struct {
 	//
 	Client      *dockerClient.Client
 	ContainerID string
+	//
+	ReadOnly bool
 }
 
 // Close closes the terminal.
@@ -66,6 +69,10 @@ func (t *Terminal) Read(p []byte) (n int, err error) {
 
 // Write writes to the terminal.
 func (t *Terminal) Write(p []byte) (n int, err error) {
+	if t.ReadOnly {
+		return 0, nil
+	}
+
 	return t.Conn.Write(p)
 }
 
