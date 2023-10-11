@@ -44,8 +44,8 @@ github.com/go-zoox/commands-as-a-service v1.6.1 h1:XJ7nQkF3jJt6x0jhTfISaLAXcmzIg
 github.com/go-zoox/commands-as-a-service v1.6.1/go.mod h1:hcv7blqvdudBnGAGdKDfy0WMo+Ahg6eZn5W0bwoCcLk=
 github.com/go-zoox/config v1.2.10 h1:mebuz6O0N81OXOCwtV+LKOiFuAfZ5wyaGsuzkGSSpf4=
 github.com/go-zoox/config v1.2.10/go.mod h1:KnSEhz7AVMqQfznJzgpzFhQfgy8UZYeone/osbvnVUE=
-github.com/go-zoox/core-utils v1.2.14 h1:Z6x9QTgfBfhbSOOPEDLqLs9UGBWkXgBpVPlJ4pI68yk=
-github.com/go-zoox/core-utils v1.2.14/go.mod h1:raOOwr2l2sJQyjR0Dg33sg0ry4U1/L2eNTuLFRpUXWs=
+github.com/go-zoox/core-utils v1.3.1 h1:uH8cWA3hYOox68+b87/j4sxUGkHjqf/EFsN/JIasCFE=
+github.com/go-zoox/core-utils v1.3.1/go.mod h1:raOOwr2l2sJQyjR0Dg33sg0ry4U1/L2eNTuLFRpUXWs=
 github.com/go-zoox/datetime v1.2.2 h1:JrI4ekdsvpsenGzrNQAOmobBTYyotaXD3YDXngvCbM4=
 github.com/go-zoox/datetime v1.2.2/go.mod h1:qvaCrzjhq/g/gstx4sx06Nl4ll2pLSrkRa9ueLjrZ9A=
 github.com/go-zoox/dotenv v1.2.3 h1:9wx4sL2u/FrRLkzoOb7ozYii6NoGsl05KoGdZm1ebIE=
