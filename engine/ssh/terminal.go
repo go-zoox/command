@@ -2,6 +2,7 @@ package ssh
 
 import (
 	"io"
+	"sync"
 
 	"github.com/go-zoox/command/terminal"
 	sshx "golang.org/x/crypto/ssh"
@@ -48,6 +49,9 @@ type Terminal struct {
 	SessionStdin io.WriteCloser
 
 	ReadOnly bool
+
+	//
+	sync.Mutex
 }
 
 // Resize resizes the terminal.
@@ -76,6 +80,9 @@ func (t *Terminal) Write(p []byte) (n int, err error) {
 	if t.ReadOnly {
 		return 0, nil
 	}
+
+	t.Lock()
+	defer t.Unlock()
 
 	return t.SessionStdin.Write(p)
 }

@@ -3,6 +3,7 @@ package host
 import (
 	"os"
 	"os/exec"
+	"sync"
 
 	"github.com/creack/pty"
 	"github.com/go-zoox/command/terminal"
@@ -27,6 +28,8 @@ type Terminal struct {
 	*os.File
 	Cmd      *exec.Cmd
 	ReadOnly bool
+	//
+	sync.Mutex
 }
 
 // Close closes the terminal.
@@ -44,6 +47,9 @@ func (t *Terminal) Write(p []byte) (n int, err error) {
 	if t.ReadOnly {
 		return 0, nil
 	}
+	t.Lock()
+	defer t.Unlock()
+
 	return t.File.Write(p)
 }
 
