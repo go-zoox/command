@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"sync"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
@@ -51,6 +52,8 @@ type Terminal struct {
 	ContainerID string
 	//
 	ReadOnly bool
+	//
+	sync.Mutex
 }
 
 // Close closes the terminal.
@@ -72,6 +75,8 @@ func (t *Terminal) Write(p []byte) (n int, err error) {
 	if t.ReadOnly {
 		return 0, nil
 	}
+	t.Lock()
+	defer t.Unlock()
 
 	return t.Conn.Write(p)
 }
