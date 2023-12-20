@@ -23,7 +23,7 @@ func (c *command) SetStderr(stderr io.Writer) error {
 
 // SetStdinWrapFunc sets the stdin wrap function for the command.
 func (c *command) SetStdinWrapFunc(stdinFunc func(b []byte) (n int, err error)) error {
-	return c.SetStdin(cio.ReaderWrapFunc(stdinFunc))
+	return c.SetStdin(cio.ReadWrapFunc(stdinFunc))
 }
 
 // SetStdoutWrapFunc sets the stdout wrap function for the command.
