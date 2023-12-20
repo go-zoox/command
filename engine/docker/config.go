@@ -11,6 +11,7 @@ type Config struct {
 	ReadOnly bool
 
 	// engine = docker
+	// Image is the name of the docker image
 	Image string
 	// Memory is the memory limit, unit: MB
 	Memory int64
@@ -24,6 +25,8 @@ type Config struct {
 	DisableNetwork bool
 	//
 	Privileged bool
+	// DockerHost is the Docker host address
+	DockerHost string
 
 	// Custom Command Runner ID
 	ID string

@@ -63,6 +63,8 @@ type Config struct {
 	DisableNetwork bool
 	// Privileged enables privileged mode
 	Privileged bool
+	// DockerHost is the Docker host
+	DockerHost string
 
 	// engine = caas
 	// Server is the command server address
@@ -160,6 +162,8 @@ func New(cfg *Config) (cmd Command, err error) {
 			Network:        cfg.Network,
 			DisableNetwork: cfg.DisableNetwork,
 			Privileged:     cfg.Privileged,
+			//
+			DockerHost: cfg.DockerHost,
 		})
 		if err != nil {
 			return nil, err
