@@ -26,7 +26,7 @@ func (d *docker) create() (err error) {
 		d.env = append(d.env, fmt.Sprintf("%s=%s", k, v))
 	}
 
-	d.client, err = client.NewClientWithOpts(client.FromEnv)
+	d.client, err = client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
 		return err
 	}
