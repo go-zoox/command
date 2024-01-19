@@ -1,10 +1,16 @@
 package config
 
-import "context"
+import (
+	"context"
+	"time"
+)
 
 // Config is the command config
 type Config struct {
 	Context context.Context
+
+	// Timeout is the command timeout
+	Timeout time.Duration
 
 	// Engine is the command engine, available: host, docker
 	Engine string
