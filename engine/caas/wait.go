@@ -9,7 +9,7 @@ func (c *caas) Wait() error {
 		Script:      c.cfg.Command,
 		Environment: c.cfg.Environment,
 		// WorkDir:     c.cfg.WorkDir,
-		User:        c.cfg.User,
+		User: c.cfg.User,
 		// Shell:       c.cfg.Shell,
 	})
 }
