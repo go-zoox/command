@@ -1,7 +1,10 @@
 package client
 
 import (
+	"time"
+
 	"github.com/go-zoox/command/agent/event"
+	"github.com/go-zoox/core-utils/fmt"
 	"github.com/go-zoox/logger"
 )
 
@@ -15,7 +18,13 @@ func (c *client) Start() error {
 		return err
 	}
 
-	<-c.startEventDone
-
-	return nil
+	timer := time.NewTicker(30 * time.Second)
+	select {
+	case <-c.core.Context().Done():
+		return c.core.Context().Err()
+	case <-c.startEventDone:
+		return nil
+	case <-timer.C:
+		return fmt.Errorf("timeout to wait start event")
+	}
 }
