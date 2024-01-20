@@ -3,7 +3,6 @@ package main
 import (
 	"github.com/go-zoox/cli"
 	"github.com/go-zoox/command"
-	"github.com/go-zoox/command/cmd/command-runner/commands"
 )
 
 func main() {
@@ -13,7 +12,8 @@ func main() {
 		Version: command.Version,
 	})
 
-	commands.Exec(app)
+	registerServerCommand(app)
+	registerClientCommand(app)
 
 	app.Run()
 }
