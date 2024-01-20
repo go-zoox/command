@@ -85,6 +85,8 @@ func Worker(c conn.Conn) {
 			}
 
 			eventBus.Emit(event.Stdin, stdinEvent.Payload)
+		default:
+			return fmt.Errorf("unknown event type: %s", evt.Type)
 		}
 
 		return nil

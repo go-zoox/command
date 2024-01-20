@@ -29,15 +29,18 @@ func registerClientCommand(app *cli.MultipleProgram) {
 			},
 		},
 		Action: func(ctx *cli.Context) error {
-			s := client.New(func(opt *client.Option) {
+			s, err := client.New(func(opt *client.Option) {
 				opt.Server = ctx.String("server")
 			})
+			if err != nil {
+				return err
+			}
 
 			if err := s.Connect(); err != nil {
 				return err
 			}
 
-			err := s.New(&command.Config{
+			err = s.New(&command.Config{
 				Command: ctx.String("command"),
 				// Timeout: 1 * time.Microsecond,
 			})

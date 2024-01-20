@@ -13,7 +13,7 @@ type Option struct {
 	Path string
 }
 
-func New(opts ...func(opt *Option)) Server {
+func New(opts ...func(opt *Option)) (Server, error) {
 	opt := &Option{
 		Port: 8080,
 		Path: "/",
@@ -24,5 +24,5 @@ func New(opts ...func(opt *Option)) Server {
 
 	return &server{
 		opt: opt,
-	}
+	}, nil
 }

@@ -3,7 +3,7 @@ package event
 import (
 	"encoding/json"
 
-	"github.com/go-zoox/command"
+	command "github.com/go-zoox/command/config"
 )
 
 const New = "new"

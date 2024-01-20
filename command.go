@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/go-zoox/command/agent/client"
 	"github.com/go-zoox/command/config"
 	"github.com/go-zoox/command/engine"
 	"github.com/go-zoox/command/engine/caas"
@@ -68,6 +69,58 @@ func New(cfg *Config) (cmd Command, err error) {
 	}
 	for k, v := range cfg.Environment {
 		environment[k] = v
+	}
+
+	// support agent
+	if cfg.Agent != "" {
+		agent, err := client.New(func(opt *client.Option) {
+			opt.Server = cfg.Agent
+		})
+		if err != nil {
+			return nil, err
+		}
+
+		if err := agent.Connect(); err != nil {
+			return nil, err
+		}
+
+		err = agent.New(&config.Config{
+			// Context:                          cfg.Context,
+			Timeout:                          cfg.Timeout,
+			Engine:                           cfg.Engine,
+			Command:                          cfg.Command,
+			WorkDir:                          cfg.WorkDir,
+			Environment:                      environment,
+			User:                             cfg.User,
+			Shell:                            cfg.Shell,
+			ReadOnly:                         cfg.ReadOnly,
+			IsHistoryDisabled:                cfg.IsHistoryDisabled,
+			Image:                            cfg.Image,
+			Memory:                           cfg.Memory,
+			CPU:                              cfg.CPU,
+			Platform:                         cfg.Platform,
+			Network:                          cfg.Network,
+			DisableNetwork:                   cfg.DisableNetwork,
+			Privileged:                       cfg.Privileged,
+			DockerHost:                       cfg.DockerHost,
+			Server:                           cfg.Server,
+			ClientID:                         cfg.ClientID,
+			ClientSecret:                     cfg.ClientSecret,
+			SSHHost:                          cfg.SSHHost,
+			SSHPort:                          cfg.SSHPort,
+			SSHUser:                          cfg.SSHUser,
+			SSHPass:                          cfg.SSHPass,
+			SSHPrivateKey:                    cfg.SSHPrivateKey,
+			SSHPrivateKeySecret:              cfg.SSHPrivateKeySecret,
+			SSHIsIgnoreStrictHostKeyChecking: cfg.SSHIsIgnoreStrictHostKeyChecking,
+			SSHKnowHostsFilePath:             cfg.SSHKnowHostsFilePath,
+			ID:                               cfg.ID,
+		})
+		if err != nil {
+			return nil, err
+		}
+
+		return agent, nil
 	}
 
 	var engine engine.Engine

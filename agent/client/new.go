@@ -1,8 +1,8 @@
 package client
 
 import (
-	"github.com/go-zoox/command"
 	"github.com/go-zoox/command/agent/event"
+	command "github.com/go-zoox/command/config"
 	"github.com/go-zoox/logger"
 )
 

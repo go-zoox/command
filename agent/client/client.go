@@ -4,10 +4,12 @@ import (
 	"io"
 	"os"
 
-	"github.com/go-zoox/command"
 	"github.com/go-zoox/command/agent/event"
+	"github.com/go-zoox/command/terminal"
 	"github.com/go-zoox/logger"
 	"github.com/go-zoox/websocket"
+
+	command "github.com/go-zoox/command/config"
 )
 
 type Client interface {
@@ -25,6 +27,8 @@ type Client interface {
 	SetStderr(stderr io.Writer) error
 	//
 	Run() error
+	//
+	Terminal() (terminal.Terminal, error)
 }
 
 type client struct {
@@ -48,7 +52,7 @@ type Option struct {
 	Server string
 }
 
-func New(opts ...func(opt *Option)) Client {
+func New(opts ...func(opt *Option)) (Client, error) {
 	opt := &Option{
 		Server: "ws://localhost:8080",
 	}
@@ -69,7 +73,7 @@ func New(opts ...func(opt *Option)) Client {
 		startEventDone:  make(chan struct{}),
 		waitEventDone:   make(chan struct{}),
 		cancelEventDone: make(chan struct{}),
-	}
+	}, nil
 }
 
 func (c *client) sendEvent(evt *event.Event) error {

@@ -64,4 +64,7 @@ type Config struct {
 
 	// Custom Command Runner ID
 	ID string
+
+	// Agent is the command runner agent address
+	Agent string
 }

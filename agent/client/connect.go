@@ -48,6 +48,8 @@ func (c *client) Connect() error {
 				return err
 			}
 
+			logger.Debugf("receive event from server: %s", message)
+
 			switch evt.Type {
 			case event.Done:
 				responseEvent := &event.DoneEvent{}
@@ -61,6 +63,8 @@ func (c *client) Connect() error {
 					c.startEventDone <- struct{}{}
 				case event.Wait:
 					c.waitEventDone <- struct{}{}
+				case event.Cancel:
+					c.cancelEventDone <- struct{}{}
 				}
 			case event.Stdout:
 				stdoutEvent := &event.StdoutEvent{}

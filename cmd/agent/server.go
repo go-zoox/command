@@ -19,9 +19,12 @@ func registerServerCommand(app *cli.MultipleProgram) {
 			},
 		},
 		Action: func(ctx *cli.Context) error {
-			s := server.New(func(opt *server.Option) {
+			s, err := server.New(func(opt *server.Option) {
 				opt.Port = ctx.Int("port")
 			})
+			if err != nil {
+				return err
+			}
 
 			return s.Run()
 		},
