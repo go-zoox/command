@@ -18,11 +18,12 @@ func (c *command) Run() error {
 			done <- c.Wait()
 		}()
 
-		timeout := time.After(c.cfg.Timeout)
 		select {
-		case <-timeout:
+		case <-c.cfg.Context.Done():
+			return c.cfg.Context.Err()
+		case <-time.After(c.cfg.Timeout):
 			c.Cancel()
-			return fmt.Errorf("timeout to run command (timeout: %s)", c.cfg.Timeout)
+			return fmt.Errorf("timeout to run command (command: %s, timeout: %s)", c.cfg.Command, c.cfg.Timeout)
 		case err := <-done:
 			return err
 		}

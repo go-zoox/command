@@ -24,6 +24,11 @@ func Exec(app *cli.MultipleProgram) {
 		Usage: "command execute",
 		Flags: []cli.Flag{
 			&cli.StringFlag{
+				Name:    "agent",
+				Usage:   "command agent server",
+				EnvVars: []string{"AGENT"},
+			},
+			&cli.StringFlag{
 				Name:    "engine",
 				Usage:   "command engine, avaliable: host, docker, caas",
 				Aliases: []string{"e"},
@@ -155,6 +160,8 @@ func Exec(app *cli.MultipleProgram) {
 		},
 		Action: func(ctx *cli.Context) (err error) {
 			cmd, err := command.New(&command.Config{
+				Agent: ctx.String("agent"),
+				//
 				Engine:         ctx.String("engine"),
 				Command:        ctx.String("command"),
 				WorkDir:        ctx.String("workdir"),
