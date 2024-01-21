@@ -21,6 +21,8 @@ func (c *client) New(command *command.Config) error {
 	}
 
 	timer := time.NewTicker(30 * time.Second)
+	defer timer.Stop()
+
 	select {
 	case <-c.core.Context().Done():
 		return c.core.Context().Err()
