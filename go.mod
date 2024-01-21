@@ -14,7 +14,7 @@ require (
 	github.com/go-zoox/fs v1.3.13
 	github.com/go-zoox/logger v1.4.6
 	github.com/go-zoox/uuid v0.0.1
-	github.com/go-zoox/websocket v1.0.0
+	github.com/go-zoox/websocket v1.0.1
 	github.com/opencontainers/image-spec v1.0.2
 	github.com/spf13/cast v1.5.1
 	golang.org/x/crypto v0.14.0
