@@ -43,52 +43,61 @@ func (c *client) Connect() error {
 				return nil
 			}
 
-			evt := &event.Event{}
-			if err := evt.Decode(message); err != nil {
-				return err
+			handleMessage := func() error {
+				evt := &event.Event{}
+				if err := evt.Decode(message); err != nil {
+					return err
+				}
+
+				logger.Debugf("receive event from server: %s", message)
+
+				switch evt.Type {
+				case event.Done:
+					responseEvent := &event.DoneEvent{}
+					if err := responseEvent.Decode(message); err != nil {
+						return err
+					}
+					switch string(responseEvent.Payload) {
+					case event.New:
+						c.newEventDone <- struct{}{}
+					case event.Start:
+						c.startEventDone <- struct{}{}
+					case event.Wait:
+						c.waitEventDone <- struct{}{}
+					case event.Cancel:
+						c.cancelEventDone <- struct{}{}
+					}
+				case event.Stdout:
+					stdoutEvent := &event.StdoutEvent{}
+					if err := stdoutEvent.Decode(message); err != nil {
+						return err
+					}
+
+					c.stdout.Write(stdoutEvent.Payload)
+				case event.Stderr:
+					stderrEvent := &event.StderrEvent{}
+					if err := stderrEvent.Decode(message); err != nil {
+						return err
+					}
+
+					c.stderr.Write(stderrEvent.Payload)
+				case event.Exitcode:
+					exitcodeEvent := &event.ExitcodeEvent{}
+					if err := exitcodeEvent.Decode(message); err != nil {
+						return err
+					}
+
+					exitcode := cast.ToInt(string(exitcodeEvent.Payload))
+					c.exitcodeCh <- exitcode
+				}
+				return nil
 			}
 
-			logger.Debugf("receive event from server: %s", message)
-
-			switch evt.Type {
-			case event.Done:
-				responseEvent := &event.DoneEvent{}
-				if err := responseEvent.Decode(message); err != nil {
-					return err
+			go func() {
+				if err := handleMessage(); err != nil {
+					logger.Errorf("handle message error: %s", err)
 				}
-				switch string(responseEvent.Payload) {
-				case event.New:
-					c.newEventDone <- struct{}{}
-				case event.Start:
-					c.startEventDone <- struct{}{}
-				case event.Wait:
-					c.waitEventDone <- struct{}{}
-				case event.Cancel:
-					c.cancelEventDone <- struct{}{}
-				}
-			case event.Stdout:
-				stdoutEvent := &event.StdoutEvent{}
-				if err := stdoutEvent.Decode(message); err != nil {
-					return err
-				}
-
-				c.stdout.Write(stdoutEvent.Payload)
-			case event.Stderr:
-				stderrEvent := &event.StderrEvent{}
-				if err := stderrEvent.Decode(message); err != nil {
-					return err
-				}
-
-				c.stderr.Write(stderrEvent.Payload)
-			case event.Exitcode:
-				exitcodeEvent := &event.ExitcodeEvent{}
-				if err := exitcodeEvent.Decode(message); err != nil {
-					return err
-				}
-
-				exitcode := cast.ToInt(string(exitcodeEvent.Payload))
-				c.exitcodeCh <- exitcode
-			}
+			}()
 
 			return nil
 		})
