@@ -12,7 +12,6 @@ import (
 	"github.com/go-zoox/cli"
 	"github.com/go-zoox/command"
 	"github.com/go-zoox/command/terminal"
-	"github.com/go-zoox/fs"
 
 	"golang.org/x/term"
 )
@@ -46,7 +45,7 @@ func Exec(app *cli.MultipleProgram) {
 				Usage:   "the command workdir",
 				Aliases: []string{"w"},
 				EnvVars: []string{"WORKDIR"},
-				Value:   fs.CurrentDir(),
+				// Value:   fs.CurrentDir(),
 			},
 			&cli.StringFlag{
 				Name:    "user",
