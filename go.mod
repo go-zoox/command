@@ -10,11 +10,10 @@ require (
 	github.com/go-zoox/cli v1.3.8
 	github.com/go-zoox/commands-as-a-service v1.6.1
 	github.com/go-zoox/core-utils v1.3.6
-	github.com/go-zoox/eventemitter v1.3.3
-	github.com/go-zoox/fs v1.3.13
+	github.com/go-zoox/eventemitter v1.4.0
 	github.com/go-zoox/logger v1.4.6
 	github.com/go-zoox/uuid v0.0.1
-	github.com/go-zoox/websocket v1.0.1
+	github.com/go-zoox/websocket v1.0.3
 	github.com/opencontainers/image-spec v1.0.2
 	github.com/spf13/cast v1.5.1
 	golang.org/x/crypto v0.14.0
@@ -38,6 +37,7 @@ require (
 	github.com/go-zoox/dotenv v1.2.5 // indirect
 	github.com/go-zoox/encoding v1.2.1 // indirect
 	github.com/go-zoox/errors v1.0.2 // indirect
+	github.com/go-zoox/fs v1.3.13 // indirect
 	github.com/go-zoox/ini v1.0.4 // indirect
 	github.com/go-zoox/safe v1.0.1 // indirect
 	github.com/go-zoox/tag v1.2.6 // indirect
