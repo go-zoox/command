@@ -15,7 +15,6 @@ require (
 	github.com/go-zoox/uuid v0.0.1
 	github.com/go-zoox/websocket v1.0.3
 	github.com/opencontainers/image-spec v1.0.2
-	github.com/spf13/cast v1.5.1
 	golang.org/x/crypto v0.14.0
 	golang.org/x/term v0.13.0
 )
@@ -57,6 +56,7 @@ require (
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/sevlyar/go-daemon v0.1.6 // indirect
 	github.com/sirupsen/logrus v1.9.0 // indirect
+	github.com/spf13/cast v1.5.1 // indirect
 	github.com/stretchr/testify v1.8.4 // indirect
 	github.com/urfave/cli/v2 v2.25.7 // indirect
 	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673 // indirect

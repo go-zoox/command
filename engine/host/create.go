@@ -8,8 +8,8 @@ import (
 	"os/user"
 	"syscall"
 
+	"github.com/go-zoox/core-utils/cast"
 	"github.com/go-zoox/logger"
-	"github.com/spf13/cast"
 )
 
 // create creates the command.

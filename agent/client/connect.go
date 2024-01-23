@@ -2,11 +2,11 @@ package client
 
 import (
 	"github.com/go-zoox/command/agent/event"
+	"github.com/go-zoox/core-utils/cast"
 	"github.com/go-zoox/core-utils/fmt"
 	"github.com/go-zoox/logger"
 	"github.com/go-zoox/websocket"
 	"github.com/go-zoox/websocket/conn"
-	"github.com/spf13/cast"
 )
 
 func (c *client) Connect() error {
