@@ -25,7 +25,8 @@ type Config struct {
 	ReadOnly bool
 
 	// engine = host
-	IsHistoryDisabled bool
+	IsHistoryDisabled           bool
+	IsInheritEnvironmentEnabled bool
 
 	// engine = docker
 	Image string
