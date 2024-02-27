@@ -12,6 +12,8 @@ type Config struct {
 
 	//
 	IsHistoryDisabled bool
+	//
+	IsInheritEnvironmentEnabled bool
 
 	// Custom Command Runner ID
 	ID string

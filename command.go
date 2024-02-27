@@ -138,6 +138,8 @@ func New(cfg *Config) (cmd Command, err error) {
 			ReadOnly: cfg.ReadOnly,
 			//
 			IsHistoryDisabled: cfg.IsHistoryDisabled,
+			//
+			IsInheritEnvironmentEnabled: cfg.IsInheritEnvironmentEnabled,
 		})
 		if err != nil {
 			return nil, err

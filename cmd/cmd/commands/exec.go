@@ -8,6 +8,8 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/go-zoox/core-utils/strings"
+
 	"github.com/eiannone/keyboard"
 	"github.com/go-zoox/cli"
 	"github.com/go-zoox/command"
@@ -156,13 +158,24 @@ func Exec(app *cli.MultipleProgram) {
 				Usage:   "SSH know hosts file path",
 				EnvVars: []string{"SSH_KNOW_HOSTS_FILE_PATH"},
 			},
+			&cli.StringSliceFlag{
+				Name:  "env",
+				Usage: `Set environment variables for the command`,
+			},
 		},
 		Action: func(ctx *cli.Context) (err error) {
+			environment := map[string]string{}
+			for _, e := range ctx.StringSlice("env") {
+				kv := strings.SplitN(e, "=", 2)
+				environment[kv[0]] = kv[1]
+			}
+
 			cmd, err := command.New(&command.Config{
 				Agent: ctx.String("agent"),
 				//
 				Engine:         ctx.String("engine"),
 				Command:        ctx.String("command"),
+				Environment:    environment,
 				WorkDir:        ctx.String("workdir"),
 				User:           ctx.String("user"),
 				Shell:          ctx.String("shell"),
