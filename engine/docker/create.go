@@ -13,6 +13,7 @@ import (
 	"github.com/docker/docker/pkg/jsonmessage"
 	"github.com/go-zoox/core-utils/cast"
 	"github.com/go-zoox/core-utils/strings"
+	"github.com/go-zoox/datetime"
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
 )
 
@@ -26,6 +27,9 @@ func (d *docker) create() (err error) {
 		d.env = append(d.env, fmt.Sprintf("%s=%s", k, v))
 	}
 
+	d.stderr.Write([]byte(fmt.Sprintf("[%s][docker] prepare ...\n", datetime.Now().Format())))
+
+	d.stderr.Write([]byte(fmt.Sprintf("[%s][docker] connect docker engine ...\n", datetime.Now().Format())))
 	d.client, err = client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation(), func(c *client.Client) error {
 		if d.cfg.DockerHost != "" {
 			if err := client.WithHost(d.cfg.DockerHost)(c); err != nil {
@@ -95,8 +99,10 @@ func (d *docker) create() (err error) {
 		EndpointsConfig: map[string]*network.EndpointSettings{},
 	}
 	if d.cfg.Network != "" {
+		d.stderr.Write([]byte(fmt.Sprintf("[%s][docker] inspect network %s ...\n", datetime.Now().Format(), d.cfg.Network)))
 		networkIns, err := d.client.NetworkInspect(context.Background(), d.cfg.Network, types.NetworkInspectOptions{})
 		if err != nil {
+			d.stderr.Write([]byte(fmt.Sprintf("[%s][docker] failed to inspect network: %s\n", datetime.Now().Format(), err)))
 			return err
 		}
 
@@ -110,6 +116,7 @@ func (d *docker) create() (err error) {
 		Architecture: "amd64",
 	}
 	if d.cfg.Platform != "" {
+		d.stderr.Write([]byte(fmt.Sprintf("[%s][docker] platform: %s ...\n", datetime.Now().Format(), d.cfg.Platform)))
 		switch d.cfg.Platform {
 		case "linux/amd64", "linux/arm64":
 		default:
@@ -121,22 +128,28 @@ func (d *docker) create() (err error) {
 		platformCfg.Architecture = osArch[1]
 	}
 
+	d.stderr.Write([]byte(fmt.Sprintf("[%s][docker] pull image %s ...\n", datetime.Now().Format(), d.cfg.Image)))
 	imagePullReader, err := d.client.ImagePull(context.Background(), d.cfg.Image, types.ImagePullOptions{
 		Platform: d.cfg.Platform,
 	})
 	if err != nil {
+		d.stderr.Write([]byte(fmt.Sprintf("[%s][docker] failed to pull image %s ...\n", datetime.Now().Format(), err)))
 		return err
 	}
 	defer imagePullReader.Close()
 
-	if err := jsonmessage.DisplayJSONMessagesToStream(imagePullReader, streams.NewOut(d.stdout), nil); err != nil {
+	if err := jsonmessage.DisplayJSONMessagesToStream(imagePullReader, streams.NewOut(d.stderr), nil); err != nil {
 		return err
 	}
 
+	d.stderr.Write([]byte(fmt.Sprintf("[%s][docker] create container ...\n", datetime.Now().Format())))
 	d.container, err = d.client.ContainerCreate(context.Background(), cfg, hostCfg, networkCfg, platformCfg, d.cfg.ID)
 	if err != nil {
+		d.stderr.Write([]byte(fmt.Sprintf("[%s][docker] failed to create container: %s\n", datetime.Now().Format(), err)))
 		return err
 	}
+
+	d.stderr.Write([]byte(fmt.Sprintf("[%s][docker] prepare done ...\n", datetime.Now().Format())))
 
 	return nil
 }
