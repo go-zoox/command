@@ -5,12 +5,12 @@ import (
 	"io"
 	"net"
 
-	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/container"
 )
 
 // Start starts the command.
 func (d *docker) Start() error {
-	stream, err := d.client.ContainerAttach(context.Background(), d.container.ID, types.ContainerAttachOptions{
+	stream, err := d.client.ContainerAttach(context.Background(), d.container.ID, container.AttachOptions{
 		Stream: true,
 		Stdin:  true,
 		Stdout: true,
@@ -33,7 +33,7 @@ func (d *docker) Start() error {
 		return nil
 	}
 
-	err = d.client.ContainerStart(context.Background(), d.container.ID, types.ContainerStartOptions{})
+	err = d.client.ContainerStart(context.Background(), d.container.ID, container.StartOptions{})
 	if err != nil {
 		return err
 	}

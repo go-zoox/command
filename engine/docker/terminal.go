@@ -7,7 +7,6 @@ import (
 	"net"
 	"sync"
 
-	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	dockerClient "github.com/docker/docker/client"
 	"github.com/go-zoox/command/errors"
@@ -16,7 +15,7 @@ import (
 
 // Terminal returns a terminal.
 func (d *docker) Terminal() (terminal.Terminal, error) {
-	stream, err := d.client.ContainerAttach(context.Background(), d.container.ID, types.ContainerAttachOptions{
+	stream, err := d.client.ContainerAttach(context.Background(), d.container.ID, container.AttachOptions{
 		Stream: true,
 		Stdin:  true,
 		Stdout: true,
@@ -35,7 +34,7 @@ func (d *docker) Terminal() (terminal.Terminal, error) {
 		ReadOnly:    d.cfg.ReadOnly,
 	}
 
-	err = d.client.ContainerStart(context.Background(), d.container.ID, types.ContainerStartOptions{})
+	err = d.client.ContainerStart(context.Background(), d.container.ID, container.StartOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -60,7 +59,7 @@ type Terminal struct {
 func (t *Terminal) Close() error {
 	t.Conn.Close()
 
-	return t.Client.ContainerRemove(t.Ctx, t.ContainerID, types.ContainerRemoveOptions{
+	return t.Client.ContainerRemove(t.Ctx, t.ContainerID, container.RemoveOptions{
 		Force: true,
 	})
 }
@@ -93,7 +92,7 @@ func (t *Terminal) Resize(rows, cols int) error {
 		return nil
 	}
 
-	return t.Client.ContainerResize(t.Ctx, t.ContainerID, types.ResizeOptions{
+	return t.Client.ContainerResize(t.Ctx, t.ContainerID, container.ResizeOptions{
 		Height: uint(rows),
 		Width:  uint(cols),
 	})
