@@ -25,6 +25,8 @@ type Command interface {
 	//
 	Run() error
 	//
+	Output() ([]byte, error)
+	//
 	SetStdin(stdin io.Reader) error
 	SetStdout(stdout io.Writer) error
 	SetStderr(stderr io.Writer) error

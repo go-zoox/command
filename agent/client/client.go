@@ -28,6 +28,8 @@ type Client interface {
 	//
 	Run() error
 	//
+	Output() ([]byte, error)
+	//
 	Terminal() (terminal.Terminal, error)
 }
 
