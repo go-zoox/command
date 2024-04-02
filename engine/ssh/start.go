@@ -20,6 +20,10 @@ func (s *ssh) Start() error {
 		return nil
 	}
 
+	for k, v := range s.cfg.Environment {
+		s.session.Setenv(k, v)
+	}
+
 	return s.session.Start(s.cfg.Command)
 }
 
