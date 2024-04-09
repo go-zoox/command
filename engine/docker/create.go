@@ -3,6 +3,7 @@ package docker
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"github.com/docker/cli/cli/streams"
 	"github.com/docker/docker/api/types"
@@ -21,6 +22,14 @@ import (
 func (d *docker) create() (err error) {
 	if d.cfg.Command != "" {
 		d.args = append(d.args, "-c", d.cfg.Command)
+	}
+
+	if len(d.cfg.AllowedSystemEnvKeys) != 0 {
+		for _, key := range d.cfg.AllowedSystemEnvKeys {
+			if value, ok := os.LookupEnv(key); ok {
+				d.env = append(d.env, fmt.Sprintf("%s=%s", key, value))
+			}
+		}
 	}
 
 	for k, v := range d.cfg.Environment {

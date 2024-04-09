@@ -142,6 +142,8 @@ func New(cfg *Config) (cmd Command, err error) {
 			IsHistoryDisabled: cfg.IsHistoryDisabled,
 			//
 			IsInheritEnvironmentEnabled: cfg.IsInheritEnvironmentEnabled,
+			//
+			AllowedSystemEnvKeys: cfg.AllowedSystemEnvKeys,
 		})
 		if err != nil {
 			return nil, err
@@ -167,6 +169,8 @@ func New(cfg *Config) (cmd Command, err error) {
 			Privileged:     cfg.Privileged,
 			//
 			DockerHost: cfg.DockerHost,
+			//
+			AllowedSystemEnvKeys: cfg.AllowedSystemEnvKeys,
 		})
 		if err != nil {
 			return nil, err
@@ -186,6 +190,8 @@ func New(cfg *Config) (cmd Command, err error) {
 			Server:       cfg.Server,
 			ClientID:     cfg.ClientID,
 			ClientSecret: cfg.ClientSecret,
+			//
+			AllowedSystemEnvKeys: cfg.AllowedSystemEnvKeys,
 		})
 		if err != nil {
 			return nil, err
@@ -208,6 +214,8 @@ func New(cfg *Config) (cmd Command, err error) {
 			Platform:       cfg.Platform,
 			Network:        cfg.Network,
 			DisableNetwork: cfg.DisableNetwork,
+			//
+			AllowedSystemEnvKeys: cfg.AllowedSystemEnvKeys,
 		})
 		if err != nil {
 			return nil, err
@@ -233,6 +241,8 @@ func New(cfg *Config) (cmd Command, err error) {
 			//
 			IsIgnoreStrictHostKeyChecking: cfg.SSHIsIgnoreStrictHostKeyChecking,
 			KnowHostsFilePath:             cfg.SSHKnowHostsFilePath,
+			//
+			AllowedSystemEnvKeys: cfg.AllowedSystemEnvKeys,
 		})
 		if err != nil {
 			return nil, err

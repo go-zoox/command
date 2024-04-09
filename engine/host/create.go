@@ -26,7 +26,7 @@ func (h *host) create() error {
 	logger.Debugf("create command: %s %v", h.cfg.Shell, args)
 	h.cmd = exec.Command(h.cfg.Shell, args...)
 
-	if err := applyEnv(h.cmd, h.cfg.Environment, h.cfg.IsInheritEnvironmentEnabled); err != nil {
+	if err := applyEnv(h.cmd, h.cfg.Environment, h.cfg.IsInheritEnvironmentEnabled, h.cfg.AllowedSystemEnvKeys); err != nil {
 		return err
 	}
 
@@ -45,10 +45,16 @@ func (h *host) create() error {
 	return nil
 }
 
-func applyEnv(cmd *exec.Cmd, environment map[string]string, IsInheritEnvironmentEnabled bool) error {
+func applyEnv(cmd *exec.Cmd, environment map[string]string, IsInheritEnvironmentEnabled bool, allowedSystemEnvKeys []string) error {
 	cmd.Env = append([]string{}, "TERM=xterm")
 	if IsInheritEnvironmentEnabled {
 		cmd.Env = append(cmd.Env, os.Environ()...)
+	} else if len(allowedSystemEnvKeys) != 0 {
+		for _, key := range allowedSystemEnvKeys {
+			if value, ok := os.LookupEnv(key); ok {
+				cmd.Env = append(cmd.Env, fmt.Sprintf("%s=%s", key, value))
+			}
+		}
 	}
 
 	for k, v := range environment {

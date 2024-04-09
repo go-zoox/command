@@ -14,6 +14,8 @@ type Config struct {
 	IsHistoryDisabled bool
 	//
 	IsInheritEnvironmentEnabled bool
+	// AllowedSystemEnvKeys is the allowed system environment keys, which will be inherited to the command
+	AllowedSystemEnvKeys []string
 
 	// Custom Command Runner ID
 	ID string

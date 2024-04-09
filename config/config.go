@@ -27,6 +27,8 @@ type Config struct {
 	// engine = host
 	IsHistoryDisabled           bool
 	IsInheritEnvironmentEnabled bool
+	//
+	AllowedSystemEnvKeys []string
 
 	// engine = docker
 	Image string
