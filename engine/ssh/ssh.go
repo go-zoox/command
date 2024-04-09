@@ -31,6 +31,8 @@ type Config struct {
 	//
 	KnowHostsFilePath string
 
+	AllowedSystemEnvKeys []string
+
 	//
 	ID string
 }

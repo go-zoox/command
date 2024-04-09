@@ -25,4 +25,7 @@ type Config struct {
 
 	// Custom Command Runner ID
 	ID string
+
+	// AllowedSystemEnvKeys is the allowed system environment keys, which will be inherited to the command
+	AllowedSystemEnvKeys []string
 }

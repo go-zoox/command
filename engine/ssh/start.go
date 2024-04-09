@@ -2,6 +2,7 @@ package ssh
 
 import (
 	"io"
+	"os"
 
 	sshx "golang.org/x/crypto/ssh"
 )
@@ -18,6 +19,15 @@ func (s *ssh) Start() error {
 
 	if err := applyStderr(s.session, s.stderr); err != nil {
 		return nil
+	}
+
+	if len(s.cfg.AllowedSystemEnvKeys) != 0 {
+		for _, key := range s.cfg.AllowedSystemEnvKeys {
+			if value, ok := os.LookupEnv(key); ok {
+				s.session.Setenv(key, value)
+			}
+		}
+
 	}
 
 	for k, v := range s.cfg.Environment {
