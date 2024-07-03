@@ -6,8 +6,8 @@ import (
 	"os"
 
 	"github.com/docker/cli/cli/streams"
-	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/client"
@@ -109,7 +109,7 @@ func (d *docker) create() (err error) {
 	}
 	if d.cfg.Network != "" {
 		d.stderr.Write([]byte(fmt.Sprintf("[%s][docker] inspect network %s ...\n", datetime.Now().Format(), d.cfg.Network)))
-		networkIns, err := d.client.NetworkInspect(context.Background(), d.cfg.Network, types.NetworkInspectOptions{})
+		networkIns, err := d.client.NetworkInspect(context.Background(), d.cfg.Network, network.InspectOptions{})
 		if err != nil {
 			d.stderr.Write([]byte(fmt.Sprintf("[%s][docker] failed to inspect network: %s\n", datetime.Now().Format(), err)))
 			return err
@@ -138,7 +138,7 @@ func (d *docker) create() (err error) {
 	}
 
 	d.stderr.Write([]byte(fmt.Sprintf("[%s][docker] pull image %s ...\n", datetime.Now().Format(), d.cfg.Image)))
-	imagePullReader, err := d.client.ImagePull(context.Background(), d.cfg.Image, types.ImagePullOptions{
+	imagePullReader, err := d.client.ImagePull(context.Background(), d.cfg.Image, image.PullOptions{
 		Platform: d.cfg.Platform,
 	})
 	if err != nil {
