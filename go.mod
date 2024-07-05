@@ -13,10 +13,10 @@ require (
 	github.com/go-zoox/commands-as-a-service v1.7.11
 	github.com/go-zoox/core-utils v1.4.10
 	github.com/go-zoox/datetime v1.3.1
-	github.com/go-zoox/eventemitter v1.4.0
+	github.com/go-zoox/eventemitter v1.4.1
 	github.com/go-zoox/logger v1.5.1
 	github.com/go-zoox/uuid v0.0.1
-	github.com/go-zoox/websocket v1.3.2
+	github.com/go-zoox/websocket v1.3.3
 	github.com/opencontainers/image-spec v1.1.0
 	golang.org/x/crypto v0.24.0
 	golang.org/x/term v0.21.0
@@ -33,6 +33,7 @@ require (
 	github.com/fatih/color v1.17.0 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
+	github.com/go-errors/errors v1.5.1 // indirect
 	github.com/go-logr/logr v1.4.2 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-playground/validator/v10 v10.22.0 // indirect
@@ -43,7 +44,7 @@ require (
 	github.com/go-zoox/errors v1.0.2 // indirect
 	github.com/go-zoox/fs v1.3.15 // indirect
 	github.com/go-zoox/ini v1.0.4 // indirect
-	github.com/go-zoox/safe v1.0.1 // indirect
+	github.com/go-zoox/safe v1.2.0 // indirect
 	github.com/go-zoox/tag v1.3.3 // indirect
 	github.com/goccy/go-yaml v1.11.3 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
