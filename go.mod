@@ -1,8 +1,6 @@
 module github.com/go-zoox/command
 
-go 1.21
-
-toolchain go1.22.2
+go 1.22.1
 
 require (
 	github.com/creack/pty v1.1.21
