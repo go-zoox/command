@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"os"
 
 	"github.com/go-zoox/command/agent/client"
 	"github.com/go-zoox/command/config"
@@ -68,6 +69,10 @@ func New(cfg *Config) (cmd Command, err error) {
 		"GO_ZOOX_COMMAND_PLATFORM":        cfg.Platform,
 		"GO_ZOOX_COMMAND_NETWORK":         cfg.Network,
 		"GO_ZOOX_COMMAND_DISABLE_NETWORK": fmt.Sprintf("%t", cfg.DisableNetwork),
+		//
+		"HOME": os.Getenv("HOME"),
+		"USER": os.Getenv("USER"),
+		"PATH": os.Getenv("PATH"),
 	}
 	for k, v := range cfg.Environment {
 		environment[k] = v
