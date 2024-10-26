@@ -7,6 +7,8 @@ import (
 	"github.com/go-zoox/command/engine/dind"
 	"github.com/go-zoox/command/engine/docker"
 	"github.com/go-zoox/command/engine/host"
+
+	// "github.com/go-zoox/command/engine/idp"
 	"github.com/go-zoox/command/engine/ssh"
 )
 
@@ -160,4 +162,30 @@ func init() {
 
 		return engine, nil
 	})
+
+	// // Register the idp engine
+	// engine.Register(idp.Name, func(cfg *config.Config) (engine.Engine, error) {
+	// 	engine, err := idp.New(&idp.Config{
+	// 		ID: cfg.ID,
+	// 		//
+	// 		Command:     cfg.Command,
+	// 		WorkDir:     cfg.WorkDir,
+	// 		Environment: cfg.Environment,
+	// 		User:        cfg.User,
+	// 		Shell:       cfg.Shell,
+	// 		//
+	// 		ReadOnly: cfg.ReadOnly,
+	// 		//
+	// 		Server:       cfg.Server,
+	// 		ClientID:     cfg.ClientID,
+	// 		ClientSecret: cfg.ClientSecret,
+	// 		//
+	// 		AllowedSystemEnvKeys: cfg.AllowedSystemEnvKeys,
+	// 	})
+	// 	if err != nil {
+	// 		return nil, err
+	// 	}
+
+	// 	return engine, nil
+	// })
 }
