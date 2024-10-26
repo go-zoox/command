@@ -68,6 +68,9 @@ func (d *docker) create() (err error) {
 	}
 
 	hostCfg := &container.HostConfig{
+		// auto remove container
+		AutoRemove: true,
+		//
 		Resources: container.Resources{
 			// Memory:    d.cfg.Memory,
 			// CPUPeriod: 100000,
