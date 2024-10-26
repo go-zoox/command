@@ -9,11 +9,7 @@ import (
 	"github.com/go-zoox/command/agent/client"
 	"github.com/go-zoox/command/config"
 	"github.com/go-zoox/command/engine"
-	"github.com/go-zoox/command/engine/caas"
-	"github.com/go-zoox/command/engine/dind"
-	"github.com/go-zoox/command/engine/docker"
 	"github.com/go-zoox/command/engine/host"
-	"github.com/go-zoox/command/engine/ssh"
 	"github.com/go-zoox/command/terminal"
 	"github.com/go-zoox/uuid"
 )
@@ -77,6 +73,7 @@ func New(cfg *Config) (cmd Command, err error) {
 	for k, v := range cfg.Environment {
 		environment[k] = v
 	}
+	cfg.Environment = environment
 
 	// support agent
 	if cfg.Agent != "" {
@@ -130,140 +127,24 @@ func New(cfg *Config) (cmd Command, err error) {
 		return agent, nil
 	}
 
-	var engine engine.Engine
-	switch cfg.Engine {
-	case host.Name:
-		engine, err = host.New(&host.Config{
-			ID: cfg.ID,
-			//
-			Command:     cfg.Command,
-			WorkDir:     cfg.WorkDir,
-			Environment: environment,
-			User:        cfg.User,
-			Shell:       cfg.Shell,
-			//
-			ReadOnly: cfg.ReadOnly,
-			//
-			IsHistoryDisabled: cfg.IsHistoryDisabled,
-			//
-			IsInheritEnvironmentEnabled: cfg.IsInheritEnvironmentEnabled,
-			//
-			AllowedSystemEnvKeys: cfg.AllowedSystemEnvKeys,
-		})
-		if err != nil {
-			return nil, err
-		}
-	case docker.Name:
-		engine, err = docker.New(&docker.Config{
-			ID: cfg.ID,
-			//
-			Command:     cfg.Command,
-			WorkDir:     cfg.WorkDir,
-			Environment: environment,
-			User:        cfg.User,
-			Shell:       cfg.Shell,
-			//
-			ReadOnly: cfg.ReadOnly,
-			//
-			Image:          cfg.Image,
-			Memory:         cfg.Memory,
-			CPU:            cfg.CPU,
-			Platform:       cfg.Platform,
-			Network:        cfg.Network,
-			DisableNetwork: cfg.DisableNetwork,
-			Privileged:     cfg.Privileged,
-			//
-			DockerHost: cfg.DockerHost,
-			//
-			AllowedSystemEnvKeys: cfg.AllowedSystemEnvKeys,
-		})
-		if err != nil {
-			return nil, err
-		}
-	case caas.Name:
-		engine, err = caas.New(&caas.Config{
-			ID: cfg.ID,
-			//
-			Command:     cfg.Command,
-			WorkDir:     cfg.WorkDir,
-			Environment: environment,
-			User:        cfg.User,
-			Shell:       cfg.Shell,
-			//
-			ReadOnly: cfg.ReadOnly,
-			//
-			Server:       cfg.Server,
-			ClientID:     cfg.ClientID,
-			ClientSecret: cfg.ClientSecret,
-			//
-			AllowedSystemEnvKeys: cfg.AllowedSystemEnvKeys,
-		})
-		if err != nil {
-			return nil, err
-		}
-	case dind.Name:
-		engine, err = dind.New(&dind.Config{
-			ID: cfg.ID,
-			//
-			Command:     cfg.Command,
-			WorkDir:     cfg.WorkDir,
-			Environment: environment,
-			User:        cfg.User,
-			Shell:       cfg.Shell,
-			//
-			ReadOnly: cfg.ReadOnly,
-			//
-			Image:          cfg.Image,
-			Memory:         cfg.Memory,
-			CPU:            cfg.CPU,
-			Platform:       cfg.Platform,
-			Network:        cfg.Network,
-			DisableNetwork: cfg.DisableNetwork,
-			//
-			AllowedSystemEnvKeys: cfg.AllowedSystemEnvKeys,
-		})
-		if err != nil {
-			return nil, err
-		}
-	case ssh.Name:
-		engine, err = ssh.New(&ssh.Config{
-			ID: cfg.ID,
-			//
-			Command:     cfg.Command,
-			WorkDir:     cfg.WorkDir,
-			Environment: environment,
-			// User:        cfg.User,
-			Shell: cfg.Shell,
-			//
-			ReadOnly: cfg.ReadOnly,
-			//
-			Host:             cfg.SSHHost,
-			Port:             cfg.SSHPort,
-			User:             cfg.SSHUser,
-			Pass:             cfg.SSHPass,
-			PrivateKey:       cfg.SSHPrivateKey,
-			PrivateKeySecret: cfg.SSHPrivateKeySecret,
-			//
-			IsIgnoreStrictHostKeyChecking: cfg.SSHIsIgnoreStrictHostKeyChecking,
-			KnowHostsFilePath:             cfg.SSHKnowHostsFilePath,
-			//
-			AllowedSystemEnvKeys: cfg.AllowedSystemEnvKeys,
-		})
-		if err != nil {
-			return nil, err
-		}
-	default:
+	var eg engine.Engine
+	if createEngine, err := engine.Get(cfg.Engine); err != nil {
 		return nil, fmt.Errorf("unsupported command engine: %s", cfg.Engine)
+	} else {
+		eg, err = createEngine(cfg)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	go func() {
 		<-cfg.Context.Done()
-		engine.Cancel()
+		eg.Cancel()
 	}()
 
 	return &command{
 		cfg:    cfg,
-		engine: engine,
+		engine: eg,
 	}, nil
 }
 

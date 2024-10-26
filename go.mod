@@ -7,6 +7,7 @@ require (
 	github.com/docker/cli v27.0.3+incompatible
 	github.com/docker/docker v27.0.3+incompatible
 	github.com/eiannone/keyboard v0.0.0-20220611211555-0d226195f203
+	github.com/go-zoox/cache v1.0.7
 	github.com/go-zoox/cli v1.4.0
 	github.com/go-zoox/commands-as-a-service v1.7.11
 	github.com/go-zoox/core-utils v1.4.10
@@ -23,8 +24,10 @@ require (
 require (
 	github.com/Azure/go-ansiterm v0.0.0-20230124172434-306776ec8161 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
+	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/containerd/log v0.1.0 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.4 // indirect
+	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/distribution/reference v0.6.0 // indirect
 	github.com/docker/go-connections v0.5.0 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
@@ -35,6 +38,7 @@ require (
 	github.com/go-logr/logr v1.4.2 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-playground/validator/v10 v10.22.0 // indirect
+	github.com/go-redis/redis/v8 v8.11.5 // indirect
 	github.com/go-zoox/chalk v1.0.2 // indirect
 	github.com/go-zoox/config v1.3.0 // indirect
 	github.com/go-zoox/dotenv v1.3.0 // indirect
@@ -42,6 +46,7 @@ require (
 	github.com/go-zoox/errors v1.0.2 // indirect
 	github.com/go-zoox/fs v1.3.15 // indirect
 	github.com/go-zoox/ini v1.0.4 // indirect
+	github.com/go-zoox/kv v1.5.9 // indirect
 	github.com/go-zoox/safe v1.2.0 // indirect
 	github.com/go-zoox/tag v1.3.3 // indirect
 	github.com/goccy/go-yaml v1.11.3 // indirect
