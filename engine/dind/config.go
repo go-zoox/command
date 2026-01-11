@@ -28,4 +28,9 @@ type Config struct {
 
 	// AllowedSystemEnvKeys is the allowed system environment keys, which will be inherited to the command
 	AllowedSystemEnvKeys []string
+
+	// DataDirOuter is the outer data directory
+	DataDirOuter string
+	// DataDirInner is the inner data directory
+	DataDirInner string
 }

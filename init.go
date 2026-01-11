@@ -67,6 +67,9 @@ func init() {
 			DockerHost: cfg.DockerHost,
 			//
 			AllowedSystemEnvKeys: cfg.AllowedSystemEnvKeys,
+			//
+			DataDirOuter: cfg.DataDirOuter,
+			DataDirInner: cfg.DataDirInner,
 		})
 		if err != nil {
 			return nil, err

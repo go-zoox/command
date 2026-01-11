@@ -34,6 +34,9 @@ func (d *dind) create() (err error) {
 		Network:        d.cfg.Network,
 		DisableNetwork: d.cfg.DisableNetwork,
 		Privileged:     true,
+		//
+		DataDirOuter: d.cfg.DataDirOuter,
+		DataDirInner: d.cfg.DataDirInner,
 	})
 
 	return

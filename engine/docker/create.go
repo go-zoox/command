@@ -106,6 +106,24 @@ func (d *docker) create() (err error) {
 			ReadOnly: false,
 		})
 	}
+	// data directory
+	if d.cfg.DataDirOuter != "" && d.cfg.DataDirInner != "" {
+		d.stderr.Write([]byte(fmt.Sprintf("[%s][docker] mount data directory: %s -> %s ...\n", datetime.Now().Format(), d.cfg.DataDirOuter, d.cfg.DataDirInner)))
+		if _, err := os.Stat(d.cfg.DataDirOuter); os.IsNotExist(err) {
+			d.stderr.Write([]byte(fmt.Sprintf("[%s][docker] data directory %s not found, create it ...\n", datetime.Now().Format(), d.cfg.DataDirOuter)))
+			if err := os.MkdirAll(d.cfg.DataDirOuter, 0755); err != nil {
+				d.stderr.Write([]byte(fmt.Sprintf("[%s][docker] failed to create data directory: %s\n", datetime.Now().Format(), err)))
+				return err
+			}
+		}
+
+		hostCfg.Mounts = append(hostCfg.Mounts, mount.Mount{
+			Type:     mount.TypeBind,
+			Source:   d.cfg.DataDirOuter,
+			Target:   d.cfg.DataDirInner,
+			ReadOnly: false,
+		})
+	}
 
 	networkCfg := &network.NetworkingConfig{
 		EndpointsConfig: map[string]*network.EndpointSettings{},

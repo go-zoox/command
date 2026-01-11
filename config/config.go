@@ -70,4 +70,9 @@ type Config struct {
 
 	// Agent is the command runner agent address
 	Agent string
+
+	// DataDirOuter is the outer data directory
+	DataDirOuter string
+	// DataDirInner is the inner data directory
+	DataDirInner string
 }

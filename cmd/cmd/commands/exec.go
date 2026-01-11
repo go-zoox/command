@@ -162,6 +162,16 @@ func Exec(app *cli.MultipleProgram) {
 				Name:  "env",
 				Usage: `Set environment variables for the command`,
 			},
+			&cli.StringFlag{
+				Name:    "data-dir-outer",
+				Usage:   "Data directory outer",
+				EnvVars: []string{"DATA_DIR_OUTER"},
+			},
+			&cli.StringFlag{
+				Name:    "data-dir-inner",
+				Usage:   "Data directory inner",
+				EnvVars: []string{"DATA_DIR_INNER"},
+			},
 		},
 		Action: func(ctx *cli.Context) (err error) {
 			environment := map[string]string{}
@@ -198,6 +208,9 @@ func Exec(app *cli.MultipleProgram) {
 				SSHPrivateKeySecret:              ctx.String("ssh-private-key-secret"),
 				SSHIsIgnoreStrictHostKeyChecking: ctx.Bool("ssh-is-ignore-strict-host-key-checking"),
 				SSHKnowHostsFilePath:             ctx.String("ssh-know-hosts-file-path"),
+				//
+				DataDirOuter: ctx.String("data-dir-outer"),
+				DataDirInner: ctx.String("data-dir-inner"),
 			})
 			if err != nil {
 				return err
