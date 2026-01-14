@@ -10,6 +10,7 @@ import (
 	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/docker/api/types/network"
+	"github.com/docker/docker/api/types/registry"
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/jsonmessage"
 	"github.com/go-zoox/core-utils/cast"
@@ -156,6 +157,25 @@ func (d *docker) create() (err error) {
 		osArch := strings.Split(d.cfg.Platform, "/")
 		platformCfg.OS = osArch[0]
 		platformCfg.Architecture = osArch[1]
+	}
+
+	// Check if docker registry credentials are provided via environment variables
+	dockerRegistry := os.Getenv("DOCKER_REGISTRY")
+	dockerRegistryUsername := os.Getenv("DOCKER_REGISTRY_USERNAME")
+	dockerRegistryPassword := os.Getenv("DOCKER_REGISTRY_PASSWORD")
+	if dockerRegistry != "" && dockerRegistryUsername != "" && dockerRegistryPassword != "" {
+		d.stderr.Write([]byte(fmt.Sprintf("[%s][docker] login to registry %s ...\n", datetime.Now().Format(), dockerRegistry)))
+		authConfig := registry.AuthConfig{
+			Username:      dockerRegistryUsername,
+			Password:      dockerRegistryPassword,
+			ServerAddress: dockerRegistry,
+		}
+		_, err := d.client.RegistryLogin(context.Background(), authConfig)
+		if err != nil {
+			d.stderr.Write([]byte(fmt.Sprintf("[%s][docker] failed to login to registry %s: %s\n", datetime.Now().Format(), dockerRegistry, err)))
+			return err
+		}
+		d.stderr.Write([]byte(fmt.Sprintf("[%s][docker] login to registry %s success\n", datetime.Now().Format(), dockerRegistry)))
 	}
 
 	_, _, err = d.client.ImageInspectWithRaw(context.Background(), d.cfg.Image)
