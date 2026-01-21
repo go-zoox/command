@@ -159,10 +159,23 @@ func (d *docker) create() (err error) {
 		platformCfg.Architecture = osArch[1]
 	}
 
-	// Check if docker registry credentials are provided via environment variables
-	dockerRegistry := os.Getenv("DOCKER_REGISTRY")
-	dockerRegistryUsername := os.Getenv("DOCKER_REGISTRY_USERNAME")
-	dockerRegistryPassword := os.Getenv("DOCKER_REGISTRY_PASSWORD")
+	// Check if docker registry credentials are provided via config or environment variables
+	// Priority: config > environment variables
+	dockerRegistry := d.cfg.Registry
+	dockerRegistryUsername := d.cfg.RegistryUsername
+	dockerRegistryPassword := d.cfg.RegistryPassword
+
+	// Fallback to environment variables if not set in config
+	if dockerRegistry == "" {
+		dockerRegistry = os.Getenv("DOCKER_REGISTRY")
+	}
+	if dockerRegistryUsername == "" {
+		dockerRegistryUsername = os.Getenv("DOCKER_REGISTRY_USERNAME")
+	}
+	if dockerRegistryPassword == "" {
+		dockerRegistryPassword = os.Getenv("DOCKER_REGISTRY_PASSWORD")
+	}
+
 	if dockerRegistry != "" && dockerRegistryUsername != "" && dockerRegistryPassword != "" {
 		d.stderr.Write([]byte(fmt.Sprintf("[%s][docker] login to registry %s ...\n", datetime.Now().Format(), dockerRegistry)))
 		authConfig := registry.AuthConfig{

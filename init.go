@@ -66,6 +66,10 @@ func init() {
 			//
 			DockerHost: cfg.DockerHost,
 			//
+			Registry:         cfg.Registry,
+			RegistryUsername: cfg.RegistryUsername,
+			RegistryPassword: cfg.RegistryPassword,
+			//
 			AllowedSystemEnvKeys: cfg.AllowedSystemEnvKeys,
 			//
 			DataDirOuter: cfg.DataDirOuter,
