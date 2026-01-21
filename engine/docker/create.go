@@ -161,9 +161,9 @@ func (d *docker) create() (err error) {
 
 	// Check if docker registry credentials are provided via config or environment variables
 	// Priority: config > environment variables
-	dockerRegistry := d.cfg.Registry
-	dockerRegistryUsername := d.cfg.RegistryUsername
-	dockerRegistryPassword := d.cfg.RegistryPassword
+	dockerRegistry := d.cfg.ImageRegistry
+	dockerRegistryUsername := d.cfg.ImageRegistryUsername
+	dockerRegistryPassword := d.cfg.ImageRegistryPassword
 
 	// Fallback to environment variables if not set in config
 	if dockerRegistry == "" {

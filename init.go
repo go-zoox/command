@@ -66,9 +66,9 @@ func init() {
 			//
 			DockerHost: cfg.DockerHost,
 			//
-			Registry:         cfg.Registry,
-			RegistryUsername: cfg.RegistryUsername,
-			RegistryPassword: cfg.RegistryPassword,
+			ImageRegistry:         cfg.ImageRegistry,
+			ImageRegistryUsername: cfg.ImageRegistryUsername,
+			ImageRegistryPassword: cfg.ImageRegistryPassword,
 			//
 			AllowedSystemEnvKeys: cfg.AllowedSystemEnvKeys,
 			//

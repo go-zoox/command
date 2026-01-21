@@ -27,12 +27,12 @@ type Config struct {
 	Privileged bool
 	// DockerHost is the Docker host address
 	DockerHost string
-	// Registry is the Docker registry address
-	Registry string
-	// RegistryUsername is the Docker registry username
-	RegistryUsername string
-	// RegistryPassword is the Docker registry password
-	RegistryPassword string
+	// ImageRegistry is the Docker image registry address
+	ImageRegistry string
+	// ImageRegistryUsername is the Docker image registry username
+	ImageRegistryUsername string
+	// ImageRegistryPassword is the Docker image registry password
+	ImageRegistryPassword string
 
 	// Custom Command Runner ID
 	ID string
