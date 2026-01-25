@@ -40,6 +40,32 @@ func New(cfg *Config) (cmd Command, err error) {
 		cfg.Context = context.Background()
 	}
 
+	// If sandbox mode is enabled, force docker engine and apply security settings
+	if cfg.Sandbox {
+		if cfg.Engine != "" && cfg.Engine != "docker" {
+			return nil, fmt.Errorf("sandbox mode requires docker engine, but got: %s", cfg.Engine)
+		}
+		cfg.Engine = "docker"
+
+		// Apply default sandbox security settings if not explicitly set
+		if !cfg.DisableNetwork && cfg.Network == "" {
+			// Default to no network in sandbox mode for security
+			cfg.DisableNetwork = true
+		}
+		if cfg.Privileged {
+			// Force non-privileged in sandbox mode
+			cfg.Privileged = false
+		}
+		// Set default resource limits if not set
+		if cfg.Memory == 0 {
+			cfg.Memory = 512 // Default 512MB memory limit
+		}
+		if cfg.CPU == 0 {
+			cfg.CPU = 1.0 // Default 1 CPU core limit
+		}
+	}
+
+	// Set default engine if not set and sandbox is not enabled
 	if cfg.Engine == "" {
 		cfg.Engine = host.Name
 	}
@@ -92,6 +118,7 @@ func New(cfg *Config) (cmd Command, err error) {
 			// Context:                          cfg.Context,
 			Timeout:                          cfg.Timeout,
 			Engine:                           cfg.Engine,
+			Sandbox:                          cfg.Sandbox,
 			Command:                          cfg.Command,
 			WorkDir:                          cfg.WorkDir,
 			Environment:                      environment,

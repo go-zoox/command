@@ -74,6 +74,8 @@ func init() {
 			//
 			DataDirOuter: cfg.DataDirOuter,
 			DataDirInner: cfg.DataDirInner,
+			//
+			Sandbox: cfg.Sandbox,
 		})
 		if err != nil {
 			return nil, err

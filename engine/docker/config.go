@@ -44,4 +44,7 @@ type Config struct {
 	DataDirOuter string
 	// DataDirInner is the inner data directory
 	DataDirInner string
+
+	// Sandbox enables strict security settings for untrusted code
+	Sandbox bool
 }

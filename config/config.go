@@ -15,6 +15,10 @@ type Config struct {
 	// Engine is the command engine, available: host, docker
 	Engine string
 
+	// Sandbox enables sandbox mode for untrusted code execution
+	// When enabled, automatically uses docker engine with strict security settings
+	Sandbox bool
+
 	// engine common
 	Command     string
 	WorkDir     string

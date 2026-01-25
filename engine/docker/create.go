@@ -88,6 +88,55 @@ func (d *docker) create() (err error) {
 		// NetworkMode: "none",
 		Privileged: d.cfg.Privileged,
 	}
+
+	// Apply sandbox security settings
+	if d.cfg.Sandbox {
+		// Force non-privileged mode
+		hostCfg.Privileged = false
+
+		// Apply security options
+		hostCfg.SecurityOpt = []string{
+			"no-new-privileges:true",
+		}
+
+		// Drop all dangerous capabilities, keep only necessary ones
+		hostCfg.CapDrop = []string{
+			"ALL", // Drop all capabilities first
+		}
+		hostCfg.CapAdd = []string{
+			"CHOWN",
+			"DAC_OVERRIDE",
+			"FOWNER",
+			"FSETID",
+			"KILL",
+			"SETGID",
+			"SETUID",
+			"SETPCAP",
+			"NET_BIND_SERVICE",
+			"NET_RAW",
+			"SYS_CHROOT",
+			"MKNOD",
+			"AUDIT_WRITE",
+			"SETFCAP",
+		}
+
+		// Read-only root filesystem (can be overridden with tmpfs for /tmp)
+		hostCfg.ReadonlyRootfs = true
+
+		// Add tmpfs mounts for writable directories
+		hostCfg.Tmpfs = map[string]string{
+			"/tmp":     "rw,noexec,nosuid,size=100m",
+			"/var/tmp": "rw,noexec,nosuid,size=100m",
+		}
+
+		// Default to no network if not explicitly configured
+		if !d.cfg.DisableNetwork && d.cfg.Network == "" {
+			hostCfg.NetworkMode = "none"
+		}
+
+		d.stderr.Write([]byte(fmt.Sprintf("[%s][docker] sandbox mode enabled with strict security settings\n", datetime.Now().Format())))
+	}
+
 	if d.cfg.Memory != 0 {
 		hostCfg.Resources.Memory = d.cfg.Memory * 1024 * 1024
 	}
