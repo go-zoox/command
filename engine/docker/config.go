@@ -33,6 +33,8 @@ type Config struct {
 	ImageRegistryUsername string
 	// ImageRegistryPassword is the Docker image registry password
 	ImageRegistryPassword string
+	// Runtime is the container runtime (e.g. runsc for gVisor)
+	Runtime string
 
 	// Custom Command Runner ID
 	ID string

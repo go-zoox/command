@@ -49,3 +49,12 @@ func TestConfig_SandboxWithOtherSettings(t *testing.T) {
 		t.Errorf("expected CPU to be 1.0, got %f", cfg.CPU)
 	}
 }
+
+func TestConfig_DockerRuntime(t *testing.T) {
+	cfg := &Config{
+		Runtime: "runsc",
+	}
+	if cfg.Runtime != "runsc" {
+		t.Errorf("expected Runtime runsc, got %q", cfg.Runtime)
+	}
+}

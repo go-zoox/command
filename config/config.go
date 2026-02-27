@@ -56,6 +56,8 @@ type Config struct {
 	ImageRegistryUsername string
 	// ImageRegistryPassword is the Docker image registry password
 	ImageRegistryPassword string
+	// DockerRuntime is the container runtime (e.g. runsc for gVisor, kata for Kata Containers)
+	DockerRuntime string
 
 	// engine = caas
 	// Server is the command server address
@@ -64,6 +66,18 @@ type Config struct {
 	ClientID string
 	// ClientSecret is the client secret for server auth
 	ClientSecret string
+
+	// engine = k8s
+	K8sKubeconfig        string
+	K8sNamespace         string
+	K8sImage             string
+	K8sPodTimeoutSeconds int64
+
+	// engine = podman
+	PodmanHost string
+
+	// engine = wsl (Windows only)
+	WSLDistro string
 
 	// engine = ssh
 	SSHHost                          string

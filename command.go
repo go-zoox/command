@@ -145,6 +145,11 @@ func New(cfg *Config) (cmd Command, err error) {
 			SSHPrivateKeySecret:              cfg.SSHPrivateKeySecret,
 			SSHIsIgnoreStrictHostKeyChecking: cfg.SSHIsIgnoreStrictHostKeyChecking,
 			SSHKnowHostsFilePath:             cfg.SSHKnowHostsFilePath,
+			K8sKubeconfig:                    cfg.K8sKubeconfig,
+			K8sNamespace:                     cfg.K8sNamespace,
+			K8sImage:                         cfg.K8sImage,
+			K8sPodTimeoutSeconds:             cfg.K8sPodTimeoutSeconds,
+			PodmanHost:                       cfg.PodmanHost,
 			ID:                               cfg.ID,
 		})
 		if err != nil {

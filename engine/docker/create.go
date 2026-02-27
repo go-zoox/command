@@ -88,6 +88,9 @@ func (d *docker) create() (err error) {
 		// NetworkMode: "none",
 		Privileged: d.cfg.Privileged,
 	}
+	if d.cfg.Runtime != "" {
+		hostCfg.Runtime = d.cfg.Runtime
+	}
 
 	// Apply sandbox security settings
 	if d.cfg.Sandbox {

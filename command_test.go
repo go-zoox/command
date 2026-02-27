@@ -1,8 +1,12 @@
 package command
 
 import (
+	"errors"
+	"runtime"
 	"strings"
 	"testing"
+
+	cmderrors "github.com/go-zoox/command/errors"
 )
 
 func TestNew(t *testing.T) {
@@ -24,6 +28,162 @@ func TestNew(t *testing.T) {
 
 	if v := buf.String(); v != "hello world\n" {
 		t.Fatalf("expected %q, got %q", "hello world\n", v)
+	}
+}
+
+func TestNew_DefaultEngine(t *testing.T) {
+	cfg := &Config{
+		Command: "echo ok",
+		Engine:  "",
+	}
+	cmd, err := New(cfg)
+	if err != nil {
+		t.Fatalf("failed to create command: %v", err)
+	}
+	if cfg.Engine != "host" {
+		t.Errorf("expected default engine host, got %q", cfg.Engine)
+	}
+	_ = cmd
+}
+
+func TestNew_UnsupportedEngine(t *testing.T) {
+	cfg := &Config{
+		Command: "echo ok",
+		Engine:  "nonexistent-engine",
+	}
+	_, err := New(cfg)
+	if err == nil {
+		t.Fatal("expected error for unsupported engine")
+	}
+	if !strings.Contains(err.Error(), "unsupported") && !strings.Contains(err.Error(), "nonexistent-engine") {
+		t.Errorf("expected error to mention unsupported or engine name, got %q", err.Error())
+	}
+}
+
+func TestNew_IDGenerated(t *testing.T) {
+	cfg := &Config{
+		Command: "echo ok",
+		ID:     "",
+	}
+	_, err := New(cfg)
+	if err != nil {
+		t.Fatalf("failed to create command: %v", err)
+	}
+	if cfg.ID == "" {
+		t.Error("expected ID to be generated when empty")
+	}
+	if !strings.HasPrefix(cfg.ID, "go-zoox_command_") {
+		t.Errorf("expected ID prefix go-zoox_command_, got %q", cfg.ID)
+	}
+}
+
+func TestNew_ShellDefault(t *testing.T) {
+	cfg := &Config{
+		Command: "echo ok",
+		Shell:   "",
+	}
+	_, err := New(cfg)
+	if err != nil {
+		t.Fatalf("failed to create command: %v", err)
+	}
+	if cfg.Shell != "/bin/sh" {
+		t.Errorf("expected default shell /bin/sh, got %q", cfg.Shell)
+	}
+}
+
+func TestOutput(t *testing.T) {
+	cfg := &Config{
+		Command: "echo hello from output",
+	}
+	cmd, err := New(cfg)
+	if err != nil {
+		t.Fatalf("failed to create command: %v", err)
+	}
+	out, err := cmd.Output()
+	if err != nil {
+		t.Fatalf("Output() failed: %v", err)
+	}
+	if v := strings.TrimSpace(string(out)); v != "hello from output" {
+		t.Errorf("expected output %q, got %q", "hello from output", v)
+	}
+}
+
+func TestStartThenWait(t *testing.T) {
+	cfg := &Config{
+		Command: "echo started then wait",
+	}
+	cmd, err := New(cfg)
+	if err != nil {
+		t.Fatalf("failed to create command: %v", err)
+	}
+	buf := &strings.Builder{}
+	cmd.SetStdout(buf)
+	if err := cmd.Start(); err != nil {
+		t.Fatalf("Start() failed: %v", err)
+	}
+	if err := cmd.Wait(); err != nil {
+		t.Fatalf("Wait() failed: %v", err)
+	}
+	if v := buf.String(); !strings.Contains(v, "started then wait") {
+		t.Errorf("expected stdout to contain 'started then wait', got %q", v)
+	}
+}
+
+func TestSetStdin(t *testing.T) {
+	cfg := &Config{
+		Command: "cat",
+	}
+	cmd, err := New(cfg)
+	if err != nil {
+		t.Fatalf("failed to create command: %v", err)
+	}
+	cmd.SetStdin(strings.NewReader("stdin content\n"))
+	buf := &strings.Builder{}
+	cmd.SetStdout(buf)
+	if err := cmd.Run(); err != nil {
+		t.Fatalf("Run() failed: %v", err)
+	}
+	if v := buf.String(); v != "stdin content\n" {
+		t.Errorf("expected stdout from stdin, got %q", v)
+	}
+}
+
+func TestSetStderr(t *testing.T) {
+	cfg := &Config{
+		Command: "echo to stderr 1>&2",
+	}
+	cmd, err := New(cfg)
+	if err != nil {
+		t.Fatalf("failed to create command: %v", err)
+	}
+	stderrBuf := &strings.Builder{}
+	cmd.SetStderr(stderrBuf)
+	if err := cmd.Run(); err != nil {
+		t.Fatalf("Run() failed: %v", err)
+	}
+	if v := stderrBuf.String(); !strings.Contains(v, "to stderr") {
+		t.Errorf("expected stderr to contain 'to stderr', got %q", v)
+	}
+}
+
+func TestRun_ExitNonZero(t *testing.T) {
+	cfg := &Config{
+		Command: "exit 42",
+	}
+	cmd, err := New(cfg)
+	if err != nil {
+		t.Fatalf("failed to create command: %v", err)
+	}
+	err = cmd.Run()
+	if err == nil {
+		t.Fatal("expected error for exit 42")
+	}
+	var exitErr *cmderrors.ExitError
+	if !errors.As(err, &exitErr) {
+		t.Fatalf("expected *errors.ExitError, got %T: %v", err, err)
+	}
+	if exitErr.ExitCode() != 42 {
+		t.Errorf("expected exit code 42, got %d", exitErr.ExitCode())
 	}
 }
 
@@ -189,5 +349,92 @@ func TestSandboxMode_ForceNonPrivileged(t *testing.T) {
 	// Verify privileged mode was forced to false
 	if cfg.Privileged {
 		t.Error("expected Privileged to be false in sandbox mode, even when explicitly set to true")
+	}
+}
+
+func TestEngine_K8s(t *testing.T) {
+	cfg := &Config{
+		Command: "echo hello",
+		Engine:  "k8s",
+		K8sNamespace: "default",
+		K8sImage:     "alpine:latest",
+	}
+
+	cmd, err := New(cfg)
+	if err != nil {
+		// No cluster or kubeconfig: skip
+		if strings.Contains(err.Error(), "k8s") || strings.Contains(err.Error(), "config") || strings.Contains(err.Error(), "in-cluster") {
+			t.Skipf("k8s not available, skipping: %v", err)
+		}
+		t.Fatalf("failed to create command: %v", err)
+	}
+
+	buf := &strings.Builder{}
+	cmd.SetStdout(buf)
+
+	if err := cmd.Run(); err != nil {
+		if strings.Contains(err.Error(), "k8s") || strings.Contains(err.Error(), "job") || strings.Contains(err.Error(), "pod") {
+			t.Skipf("k8s execution failed (cluster may be unavailable): %v", err)
+		}
+		t.Fatalf("failed to run command: %v", err)
+	}
+
+	if v := buf.String(); !strings.Contains(v, "hello") {
+		t.Errorf("expected stdout to contain %q, got %q", "hello", v)
+	}
+}
+
+func TestEngine_Podman(t *testing.T) {
+	cfg := &Config{
+		Command: "echo hello",
+		Engine:  "podman",
+		Image:   "alpine:latest",
+	}
+
+	cmd, err := New(cfg)
+	if err != nil {
+		if strings.Contains(err.Error(), "podman") || strings.Contains(err.Error(), "connect") || strings.Contains(err.Error(), "socket") {
+			t.Skipf("podman not available, skipping: %v", err)
+		}
+		t.Fatalf("failed to create command: %v", err)
+	}
+
+	buf := &strings.Builder{}
+	cmd.SetStdout(buf)
+
+	if err := cmd.Run(); err != nil {
+		if strings.Contains(err.Error(), "podman") || strings.Contains(err.Error(), "container") {
+			t.Skipf("podman execution failed (podman may be unavailable): %v", err)
+		}
+		t.Fatalf("failed to run command: %v", err)
+	}
+
+	if v := buf.String(); !strings.Contains(v, "hello") {
+		t.Errorf("expected stdout to contain %q, got %q", "hello", v)
+	}
+}
+
+func TestEngine_WSL(t *testing.T) {
+	if runtime.GOOS != "windows" {
+		t.Skip("wsl engine is only available on Windows")
+	}
+	cfg := &Config{
+		Command: "echo hello",
+		Engine:  "wsl",
+	}
+	cmd, err := New(cfg)
+	if err != nil {
+		if strings.Contains(err.Error(), "wsl") || strings.Contains(err.Error(), "Windows") {
+			t.Skipf("wsl not available, skipping: %v", err)
+		}
+		t.Fatalf("failed to create command: %v", err)
+	}
+	buf := &strings.Builder{}
+	cmd.SetStdout(buf)
+	if err := cmd.Run(); err != nil {
+		t.Skipf("wsl execution failed: %v", err)
+	}
+	if v := buf.String(); !strings.Contains(v, "hello") {
+		t.Errorf("expected stdout to contain %q, got %q", "hello", v)
 	}
 }

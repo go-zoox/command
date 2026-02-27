@@ -7,7 +7,7 @@
 [![GitHub issues](https://img.shields.io/github/issues/go-zoox/command.svg)](https://github.com/go-zoox/command/issues)
 [![Release](https://img.shields.io/github/tag/go-zoox/command.svg?label=Release)](https://github.com/go-zoox/command/tags)
 
-A powerful and flexible command execution library for Go, supporting multiple execution engines (host, docker, ssh, caas) with built-in sandbox mode for secure execution of untrusted code.
+A powerful and flexible command execution library for Go, supporting multiple execution engines (host, docker, dind, ssh, caas, k8s, podman, wsl) with built-in sandbox mode for secure execution of untrusted code.
 
 ## Installation
 
@@ -101,8 +101,12 @@ if err := cmd.Run(); err != nil {
 
 - **host**: Execute commands directly on the host system (default)
 - **docker**: Execute commands in Docker containers
+- **dind**: Docker-in-Docker execution
 - **ssh**: Execute commands on remote servers via SSH
 - **caas**: Execute commands on Container-as-a-Service platforms
+- **k8s**: Execute commands in Kubernetes (Job/Pod) within a cluster
+- **podman**: Execute commands in Podman containers (Docker-compatible API)
+- **wsl**: Execute commands via WSL on Windows (Windows only)
 
 ### Sandbox Mode
 
@@ -158,6 +162,7 @@ if err := cmd.Run(); err != nil {
 - **Linux only**: Sandbox mode uses Linux-specific security features (seccomp, capabilities)
 - **Docker required**: Sandbox mode requires Docker to be installed and running
 - **Docker engine**: Sandbox mode automatically uses docker engine (cannot use other engines)
+- **Optional gVisor**: Set `DockerRuntime: "runsc"` to use gVisor for stronger isolation (requires runsc installed on the host)
 
 ## Configuration
 
@@ -182,6 +187,41 @@ cfg := &command.Config{
 	Memory:  512,  // MB
 	CPU:     1.0,  // cores
 	Platform: "linux/amd64",
+	// Optional: use gVisor or Kata for stronger isolation
+	DockerRuntime: "runsc",
+}
+```
+
+### Kubernetes Configuration
+
+```go
+cfg := &command.Config{
+	Command: "echo hello",
+	Engine:  "k8s",
+	K8sNamespace: "default",
+	K8sImage:     "alpine:latest",
+	K8sKubeconfig: "",  // optional; uses in-cluster or KUBECONFIG
+}
+```
+
+### Podman Configuration
+
+```go
+cfg := &command.Config{
+	Command:    "your command",
+	Engine:     "podman",
+	Image:      "alpine:latest",
+	PodmanHost: "unix:///run/podman/podman.sock",  // optional
+}
+```
+
+### WSL Configuration (Windows only)
+
+```go
+cfg := &command.Config{
+	Command:   "echo hello",
+	Engine:    "wsl",
+	WSLDistro: "Ubuntu",  // optional distribution name
 }
 ```
 
@@ -212,6 +252,9 @@ cfg := &command.Config{
 	// Data directories
 	DataDirOuter: "/host/path",
 	DataDirInner: "/container/path",
+
+	// Optional: use gVisor (runsc) or Kata for stronger isolation
+	DockerRuntime: "runsc",
 }
 ```
 
