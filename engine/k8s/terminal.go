@@ -7,67 +7,134 @@ import (
 	"sync"
 	"time"
 
-	"github.com/go-zoox/command/errors"
+	cmderrors "github.com/go-zoox/command/errors"
 	"github.com/go-zoox/command/terminal"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
+	"k8s.io/client-go/kubernetes/scheme"
+	"k8s.io/client-go/tools/remotecommand"
 )
 
-// Terminal returns a terminal for the k8s job. Resize is not supported; Wait/ExitCode use Job status.
+// Terminal returns a terminal for the k8s job.
+// It attaches to the Job's Pod using SPDY and exposes a ReadWriteCloser interface
+// compatible with the command.Terminal usage in cmd/cmd.
 func (k *k8s) Terminal() (terminal.Terminal, error) {
+	ctx := context.Background()
+
+	// Wait for Pod to be Running or already completed (for short-lived jobs).
+	podName, err := k.waitForPodRunning(ctx, 5*time.Minute)
+	if err != nil {
+		return nil, err
+	}
+
+	req := k.clientset.CoreV1().RESTClient().Post().
+		Resource("pods").
+		Namespace(k.jobNamespace).
+		Name(podName).
+		SubResource("attach").
+		VersionedParams(&corev1.PodAttachOptions{
+			Container: containerName,
+			Stdin:     true,
+			Stdout:    true,
+			Stderr:    true,
+			TTY:       true,
+		}, scheme.ParameterCodec)
+
+	exec, err := remotecommand.NewSPDYExecutor(k.restConfig, "POST", req.URL())
+	if err != nil {
+		return nil, fmt.Errorf("k8s: new attach executor (terminal): %w", err)
+	}
+
+	stdinReader, stdinWriter := io.Pipe()
+	stdoutReader, stdoutWriter := io.Pipe()
+
+	// Start attach stream in background.
+	go func() {
+		defer stdoutWriter.Close()
+		defer stdinReader.Close()
+
+		_ = exec.StreamWithContext(ctx, remotecommand.StreamOptions{
+			Stdin:  stdinReader,
+			Stdout: stdoutWriter,
+			Stderr: stdoutWriter, // merge stderr into stdout for simplicity
+			Tty:    true,
+		})
+	}()
+
 	return &Terminal{
 		k8s:      k,
+		stdin:    stdinWriter,
+		stdout:   stdoutReader,
 		ReadOnly: k.cfg.ReadOnly,
 	}, nil
 }
 
-// Terminal is a terminal that supports Wait and ExitCode; Read/Write/Resize are limited.
+// Terminal is the terminal implementation for k8s.
 type Terminal struct {
 	k8s      *k8s
 	ReadOnly bool
-	mu       sync.Mutex
-	closed   bool
+
+	stdin  io.WriteCloser
+	stdout io.ReadCloser
+
+	mu     sync.Mutex
+	closed bool
+
 	exitCode int
 	waited   bool
 }
 
-// Read returns EOF (streaming is handled by the attach goroutine from Start).
+// Read reads from the attached pod stdout/stderr stream.
 func (t *Terminal) Read(p []byte) (n int, err error) {
-	return 0, io.EOF
+	return t.stdout.Read(p)
 }
 
-// Write is a no-op (stdin is already attached in Start).
+// Write writes to the attached pod stdin stream (disabled when ReadOnly).
 func (t *Terminal) Write(p []byte) (n int, err error) {
 	if t.ReadOnly {
 		return 0, nil
 	}
-	return 0, nil
+
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	if t.closed {
+		return 0, io.EOF
+	}
+	return t.stdin.Write(p)
 }
 
-// Close is a no-op.
+// Close closes stdin; the remote stream will terminate when the process exits.
 func (t *Terminal) Close() error {
 	t.mu.Lock()
+	defer t.mu.Unlock()
+	if t.closed {
+		return nil
+	}
 	t.closed = true
-	t.mu.Unlock()
+	_ = t.stdin.Close()
 	return nil
 }
 
-// Resize is not supported for k8s attach; no-op.
+// Resize is currently a no-op; implementing remote resize would require an
+// additional exec/attach call with a TerminalSizeQueue.
 func (t *Terminal) Resize(rows, cols int) error {
 	return nil
 }
 
-// ExitCode returns the container exit code from the Job's Pod (after Wait has been called or job completed).
+// ExitCode returns the container exit code from the Job's Pod
+// (after Wait has been called or job completed).
 func (t *Terminal) ExitCode() int {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 	if t.waited {
 		return t.exitCode
 	}
+
 	ctx := context.Background()
-	pods, err := t.k8s.clientset.CoreV1().Pods(t.k8s.jobNamespace).List(ctx, metav1.ListOptions{LabelSelector: "job-name=" + t.k8s.jobName})
+	pods, err := t.k8s.clientset.CoreV1().Pods(t.k8s.jobNamespace).
+		List(ctx, metav1.ListOptions{LabelSelector: "job-name=" + t.k8s.jobName})
 	if err != nil || len(pods.Items) == 0 {
 		return -1
 	}
@@ -79,7 +146,7 @@ func (t *Terminal) ExitCode() int {
 	return -1
 }
 
-// Wait waits for the Job to complete and sets exit code.
+// Wait waits for the Job to complete and sets exit code (similar to k8s.Wait()).
 func (t *Terminal) Wait() error {
 	ctx := context.Background()
 	err := wait.PollUntilContextTimeout(ctx, 500*time.Millisecond, 1*time.Hour, true, func(ctx context.Context) (bool, error) {
@@ -95,11 +162,12 @@ func (t *Terminal) Wait() error {
 		return false, nil
 	})
 	if err != nil {
-		return fmt.Errorf("k8s: wait job: %w", err)
+		return fmt.Errorf("k8s: wait job (terminal): %w", err)
 	}
 
 	code := 0
-	pods, _ := t.k8s.clientset.CoreV1().Pods(t.k8s.jobNamespace).List(ctx, metav1.ListOptions{LabelSelector: "job-name=" + t.k8s.jobName})
+	pods, _ := t.k8s.clientset.CoreV1().Pods(t.k8s.jobNamespace).
+		List(ctx, metav1.ListOptions{LabelSelector: "job-name=" + t.k8s.jobName})
 	if len(pods.Items) > 0 {
 		for _, c := range pods.Items[0].Status.ContainerStatuses {
 			if c.Name == containerName && c.State.Terminated != nil {
@@ -115,7 +183,7 @@ func (t *Terminal) Wait() error {
 	t.mu.Unlock()
 
 	if code != 0 {
-		return &errors.ExitError{
+		return &cmderrors.ExitError{
 			Code:    code,
 			Message: fmt.Sprintf("job exited with status %d", code),
 		}
