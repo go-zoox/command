@@ -64,12 +64,18 @@ func (k *k8s) waitForPodRunning(ctx context.Context, timeout time.Duration) (str
 			return "", fmt.Errorf("k8s: list pods: %w", err)
 		}
 		for _, p := range pods.Items {
-			if p.Status.Phase == corev1.PodRunning {
+			switch p.Status.Phase {
+			case corev1.PodRunning:
 				for _, cs := range p.Status.ContainerStatuses {
 					if cs.Name == containerName && cs.Ready {
 						return p.Name, nil
 					}
 				}
+			case corev1.PodSucceeded, corev1.PodFailed:
+				// Pod 已经完成（Succeeded 或 Failed），很可能是一次性 Job。
+				// 这时再去 attach 也会很快 EOF；直接返回 Pod 名，
+				// 让上层继续流程，避免在这里一直等 Running 而“卡住”。
+				return p.Name, nil
 			}
 		}
 		select {

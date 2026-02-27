@@ -31,7 +31,7 @@ func Exec(app *cli.MultipleProgram) {
 			},
 			&cli.StringFlag{
 				Name:    "engine",
-				Usage:   "command engine, avaliable: host, docker, caas",
+				Usage:   "command engine, available: host, docker, dind, ssh, caas, k8s, podman, wsl",
 				Aliases: []string{"e"},
 				EnvVars: []string{"ENGINE"},
 				Value:   "host",
@@ -67,6 +67,11 @@ func Exec(app *cli.MultipleProgram) {
 				Aliases: []string{"i"},
 				EnvVars: []string{"IMAGE"},
 			},
+			&cli.StringFlag{
+				Name:    "docker-runtime",
+				Usage:   "Docker container runtime (e.g. runsc for gVisor)",
+				EnvVars: []string{"DOCKER_RUNTIME"},
+			},
 			&cli.BoolFlag{
 				Name:    "tty",
 				Usage:   "Allocate a pseudo-TTY. The default is false, which disables TTY allocation.",
@@ -95,6 +100,33 @@ func Exec(app *cli.MultipleProgram) {
 				Usage:   `Network name`,
 				Aliases: []string{"n"},
 				EnvVars: []string{"NETWORK"},
+			},
+			// k8s
+			&cli.StringFlag{
+				Name:    "k8s-kubeconfig",
+				Usage:   "Kubernetes kubeconfig path (for k8s engine)",
+				EnvVars: []string{"K8S_KUBECONFIG"},
+			},
+			&cli.StringFlag{
+				Name:    "k8s-namespace",
+				Usage:   "Kubernetes namespace (for k8s engine)",
+				EnvVars: []string{"K8S_NAMESPACE"},
+			},
+			&cli.StringFlag{
+				Name:    "k8s-image",
+				Usage:   "Kubernetes image (for k8s engine, overrides image when set)",
+				EnvVars: []string{"K8S_IMAGE"},
+			},
+			&cli.Int64Flag{
+				Name:    "k8s-pod-timeout-seconds",
+				Usage:   "Kubernetes Job timeout in seconds (for k8s engine)",
+				EnvVars: []string{"K8S_POD_TIMEOUT_SECONDS"},
+			},
+			// podman
+			&cli.StringFlag{
+				Name:    "podman-host",
+				Usage:   "Podman host (e.g. unix:///run/podman/podman.sock) for podman engine",
+				EnvVars: []string{"PODMAN_HOST"},
 			},
 			&cli.BoolFlag{
 				Name:    "disable-network",
@@ -163,6 +195,12 @@ func Exec(app *cli.MultipleProgram) {
 				Usage: `Set environment variables for the command`,
 			},
 			&cli.StringFlag{
+				// wsl
+				Name:    "wsl-distro",
+				Usage:   "WSL distribution name (for wsl engine)",
+				EnvVars: []string{"WSL_DISTRO"},
+			},
+			&cli.StringFlag{
 				Name:    "data-dir-outer",
 				Usage:   "Data directory outer",
 				EnvVars: []string{"DATA_DIR_OUTER"},
@@ -190,11 +228,19 @@ func Exec(app *cli.MultipleProgram) {
 				User:           ctx.String("user"),
 				Shell:          ctx.String("shell"),
 				Image:          ctx.String("image"),
+				DockerRuntime:  ctx.String("docker-runtime"),
 				Memory:         ctx.Int64("memory"),
 				CPU:            ctx.Float64("cpu"),
 				Platform:       ctx.String("platform"),
 				Network:        ctx.String("network"),
 				DisableNetwork: ctx.Bool("disable-network"),
+				//
+				K8sKubeconfig:        ctx.String("k8s-kubeconfig"),
+				K8sNamespace:         ctx.String("k8s-namespace"),
+				K8sImage:             ctx.String("k8s-image"),
+				K8sPodTimeoutSeconds: ctx.Int64("k8s-pod-timeout-seconds"),
+				//
+				PodmanHost: ctx.String("podman-host"),
 				//
 				Server:       ctx.String("server"),
 				ClientID:     ctx.String("client-id"),
@@ -209,6 +255,7 @@ func Exec(app *cli.MultipleProgram) {
 				SSHIsIgnoreStrictHostKeyChecking: ctx.Bool("ssh-is-ignore-strict-host-key-checking"),
 				SSHKnowHostsFilePath:             ctx.String("ssh-know-hosts-file-path"),
 				//
+				WSLDistro:    ctx.String("wsl-distro"),
 				DataDirOuter: ctx.String("data-dir-outer"),
 				DataDirInner: ctx.String("data-dir-inner"),
 			})
