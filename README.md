@@ -383,6 +383,23 @@ cmd.Run()
 4. **Use read-only mounts** for data that shouldn't be modified
 5. **Regularly update Docker images** to include security patches
 
+## Platform Support
+
+| Engine | Linux | macOS | Windows |
+|--------|-------|-------|---------|
+| host   | ✓     | ✓     | ✓       |
+| docker | ✓     | ✓     | ✓       |
+| dind   | ✓     | ✓     |         |
+| ssh    | ✓     | ✓     | ✓       |
+| caas   | ✓     | ✓     | ✓       |
+| k8s    | ✓     | ✓     |         |
+| podman | ✓     | ✓     |         |
+| wsl    |       |       | ✓       |
+
+**Windows notes:**
+- The `host` engine's `User` option sets environment variables (`USER`, `HOME`, etc.) but does not switch the process owner (Unix-only feature).
+- Terminal resize signaling (`SIGWINCH`) is not available on Windows.
+
 ## License
 
 GoZoox is released under the [MIT License](./LICENSE).

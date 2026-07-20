@@ -4,9 +4,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"os/signal"
-	"syscall"
-	"time"
 
 	"github.com/go-zoox/core-utils/strings"
 
@@ -298,20 +295,7 @@ func connectKeyboard(t terminal.Terminal) error {
 		return err
 	}
 
-	// 监听操作系统信号
-	sigWinch := make(chan os.Signal, 1)
-	signal.Notify(sigWinch, syscall.SIGWINCH)
-	// 启动循环来检测终端窗口大小是否发生变化
-	go func() {
-		for {
-			select {
-			case <-sigWinch:
-				resizeTerminal(t)
-			default:
-				time.Sleep(time.Millisecond * 100)
-			}
-		}
-	}()
+	startResizeWatcher(t)
 
 	if err := keyboard.Open(); err != nil {
 		return err
